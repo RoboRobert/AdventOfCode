@@ -50,7 +50,8 @@ fn main() {
         //j is used to iterate through a slice of num_card_type
         j = iterator+1;
 
-        //Adds to the
+        //Adds the number of cards to all the card types from 
+        //1 below to the number of matches
         while j <= iterator + num_matches[iterator] as usize {
             if j > len {
                 break;
