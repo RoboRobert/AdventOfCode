@@ -2,10 +2,13 @@ use std::{fs, u64::MAX};
 
 #[derive(Debug)]
 struct map_seed {
-    from_start: u64,
-    to_start: u64,
-    to_range: u64,
+    destination_start: u64,
+    source_start: u64,
+    range: u64,
 }
+
+#[derive(Debug)]
+struct source_range(u64, u64);
 
 fn main() {
     
@@ -36,9 +39,9 @@ fn main() {
         }
 
         let current_map = map_seed { 
-            to_start: current_line.split_whitespace().nth(0).unwrap().parse::<u64>().unwrap(), 
-            from_start: current_line.split_whitespace().nth(1).unwrap().parse::<u64>().unwrap(), 
-            to_range: current_line.split_whitespace().nth(2).unwrap().parse::<u64>().unwrap()
+            destination_start: current_line.split_whitespace().nth(0).unwrap().parse::<u64>().unwrap(), 
+            source_start: current_line.split_whitespace().nth(1).unwrap().parse::<u64>().unwrap(), 
+            range: current_line.split_whitespace().nth(2).unwrap().parse::<u64>().unwrap()
         };
 
         // dbg!(seed_mapper(&current_map, seeds_vec[0]));
@@ -46,35 +49,77 @@ fn main() {
         seed_maps[iterator-1].push(current_map);
     }
 
+    
+    // let mut lowest_seed: u64 = MAX;
+
+    // let test_range: source_range = source_range(10, 20);
+    // let test_range_2: source_range = source_range(11, 0);
+
+    // let overlap: source_range = contained_in(&test_range, &test_range_2).unwrap();
+    // dbg!(overlap);
+    
     let mut lowest_dest: u64 = MAX;
-    let mut current_dest: u64;
+    let mut current_range: source_range;
 
     for seed in seeds_vec {
-        current_dest = seed;
+        current_range = source_range(seed, 0);
 
         for map_type in &seed_maps {
 
             for map in map_type {
-                if !seed_mapper(map, current_dest).is_none() {
-                    current_dest = seed_mapper(map, current_dest).unwrap();
+                let current_map = source_range(map.source_start, map.range);
+
+                if !contained_in(&current_range, &current_map).is_none() {
+                    let mut temp_range = contained_in(&current_range, &current_map).unwrap();
+
+                    temp_range.0 = seed_mapper(&map, temp_range.0).unwrap();
+
+                    current_range = temp_range;
+
                     break;
                 }
             }
         }
 
-        if current_dest < lowest_dest {
-            lowest_dest = current_dest;
+        if current_range.0 < lowest_dest {
+            lowest_dest = current_range.0;
         }
     }
 
     println!("Lowest Destination: {}", lowest_dest);
 }
 
-
 fn seed_mapper(map:&map_seed, value: u64) -> Option<u64> {
-    if value > map.from_start+map.to_range || value < map.from_start {
+    if value > map.source_start+map.range || value < map.source_start {
         return None;
     }
 
-    return Some((map.to_start) + (value-map.from_start));
+    return Some((map.destination_start) + (value-map.source_start));
+}
+
+//Takes in two maps and returns the intersection slice as another map
+fn contained_in(current: &source_range, checked: &source_range) -> Option<source_range> {
+    let mut returned_range: source_range = source_range(0,0);
+    //If the ranges do not overlap, return None
+    if current.0 > (checked.0+checked.1) || checked.0 > (current.0+current.1) {
+        return None;
+    }
+
+    //Otherwise, figure out where the overlap is
+    if current.0 >= checked.0 {
+        returned_range.0 = current.0;
+    }
+    if checked.0 > current.0  {
+        returned_range.0 = checked.0;
+    }
+
+    if current.0 + current.1 <= checked.0 + checked.1  {
+        returned_range.1 = current.0 + current.1 - returned_range.0;
+    }
+    if checked.0 + checked.1 < current.0 + current.1  {
+        returned_range.1 = checked.0 + checked.1 - returned_range.0;
+    }
+
+
+    return Some(returned_range);
 }

@@ -9,7 +9,6 @@ fn main() {
     let time: u64 = 55826490;
     let distance: u64 = 246144110121111;
 
-
     let mut final_answer = 0;
     for iterator in 1..time {
         if travelled_dist(iterator,  time-iterator) > distance {

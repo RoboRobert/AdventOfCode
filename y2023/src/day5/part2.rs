@@ -2,10 +2,13 @@ use std::{fs, u64::MAX};
 
 #[derive(Debug)]
 struct map_seed {
-    from_start: u64,
-    to_start: u64,
-    to_range: u64,
+    destination_start: u64,
+    source_start: u64,
+    range: u64,
 }
+
+#[derive(Debug)]
+struct source_range(u64, u64);
 
 #[derive(Debug)]
 struct seed_tuple(u64, u64);
@@ -13,10 +16,10 @@ struct seed_tuple(u64, u64);
 fn main() {
     
     //Read the file into a string
-    let contents = fs::read_to_string("input.txt")
+    let contents = fs::read_to_string("example.txt")
         .expect("File read properly!");
 
-    //Stores the different seeds into a vector
+    //Stores the different seed ranges into a vector of pairs
     let seeds_str_vec: Vec<&str> = contents.lines().nth(0).unwrap().split(":").nth(1).unwrap().split_whitespace().collect();
     let mut seeds_vec: Vec<seed_tuple> = Vec::new();
 
@@ -44,9 +47,9 @@ fn main() {
         }
 
         let current_map = map_seed { 
-            to_start: current_line.split_whitespace().nth(0).unwrap().parse::<u64>().unwrap(), 
-            from_start: current_line.split_whitespace().nth(1).unwrap().parse::<u64>().unwrap(), 
-            to_range: current_line.split_whitespace().nth(2).unwrap().parse::<u64>().unwrap()
+            destination_start: current_line.split_whitespace().nth(0).unwrap().parse::<u64>().unwrap(), 
+            source_start: current_line.split_whitespace().nth(1).unwrap().parse::<u64>().unwrap(), 
+            range: current_line.split_whitespace().nth(2).unwrap().parse::<u64>().unwrap()
         };
 
         // dbg!(seed_mapper(&current_map, seeds_vec[0]));
@@ -55,38 +58,69 @@ fn main() {
     }
 
     let mut lowest_dest: u64 = MAX;
-    let mut current_dest: u64;
+    let mut current_range: source_range;
 
-    for current_seed in seeds_vec {
-        let range_start = current_seed.0;
-        let range_end = current_seed.0 + current_seed.1;
-        for seed in range_start..range_end {
-            current_dest = seed;
+    for seed in seeds_vec {
+        current_range = source_range(seed.0, seed.1);
+        dbg!(&current_range);
 
-            for map_type in &seed_maps {
+        for map_type in &seed_maps {
 
-                for map in map_type {
-                    if !seed_mapper(map, current_dest).is_none() {
-                        current_dest = seed_mapper(map, current_dest).unwrap();
-                        break;
-                    }
+            for map in map_type {
+                let current_map = source_range(map.source_start, map.range);
+                dbg!(&current_map);
+                if !contained_in(&current_range, &current_map).is_none() {
+                    let mut temp_range = contained_in(&current_range, &current_map).unwrap();
+                    dbg!(&temp_range);
+                    temp_range.0 = seed_mapper(&map, temp_range.0).unwrap();
+                    dbg!(&temp_range);
+                    current_range = temp_range;
+                    // dbg!(&current_range);
+                    break;
                 }
             }
+        }
 
-            if current_dest < lowest_dest {
-                lowest_dest = current_dest;
-            }
+        if current_range.0 < lowest_dest {
+            lowest_dest = current_range.0;
         }
     }
 
     println!("Lowest Destination: {}", lowest_dest);
 }
 
-
 fn seed_mapper(map:&map_seed, value: u64) -> Option<u64> {
-    if value > map.from_start+map.to_range || value < map.from_start {
+    if value > map.source_start+map.range || value < map.source_start {
         return None;
     }
 
-    return Some((map.to_start) + (value-map.from_start));
+    return Some((map.destination_start) + (value-map.source_start));
+}
+
+//Takes in two maps and returns the intersection slice as another map
+fn contained_in(current: &source_range, checked: &source_range) -> Option<source_range> {
+    let mut returned_range: source_range = source_range(0,0);
+    //If the ranges do not overlap, return None
+    if current.0 > (checked.0+checked.1) || checked.0 > (current.0+current.1) {
+        return None;
+    }
+
+    //Otherwise, figure out where the overlap is
+    if current.0 >= checked.0 {
+        returned_range.0 = current.0;
+    }
+    if checked.0 > current.0  {
+        returned_range.0 = checked.0;
+    }
+
+    if current.0 + current.1 <= checked.0 + checked.1  {
+        returned_range.1 = current.0 + current.1 - returned_range.0;
+    }
+    if checked.0 + checked.1 < current.0 + current.1  {
+        returned_range.1 = checked.0 + checked.1 - returned_range.0;
+    }
+
+
+    //Returns the overlap as a new range.
+    return Some(returned_range);
 }
