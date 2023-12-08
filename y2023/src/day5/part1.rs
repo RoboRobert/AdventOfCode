@@ -48,15 +48,6 @@ fn main() {
 
         seed_maps[iterator-1].push(current_map);
     }
-
-    
-    // let mut lowest_seed: u64 = MAX;
-
-    // let test_range: source_range = source_range(10, 20);
-    // let test_range_2: source_range = source_range(11, 0);
-
-    // let overlap: source_range = contained_in(&test_range, &test_range_2).unwrap();
-    // dbg!(overlap);
     
     let mut lowest_dest: u64 = MAX;
     let mut current_range: source_range;
@@ -109,17 +100,16 @@ fn contained_in(current: &source_range, checked: &source_range) -> Option<source
     if current.0 >= checked.0 {
         returned_range.0 = current.0;
     }
-    if checked.0 > current.0  {
+    else if checked.0 > current.0  {
         returned_range.0 = checked.0;
     }
 
     if current.0 + current.1 <= checked.0 + checked.1  {
         returned_range.1 = current.0 + current.1 - returned_range.0;
     }
-    if checked.0 + checked.1 < current.0 + current.1  {
+    else if checked.0 + checked.1 < current.0 + current.1  {
         returned_range.1 = checked.0 + checked.1 - returned_range.0;
     }
-
 
     return Some(returned_range);
 }

@@ -60,22 +60,22 @@ fn main() {
     let mut lowest_dest: u64 = MAX;
     let mut current_range: source_range;
 
-    for seed in seeds_vec {
-        current_range = source_range(seed.0, seed.1);
+    // for seed in seeds_vec {
+        current_range = source_range(seeds_vec[0].0, seeds_vec[0].1);
         dbg!(&current_range);
 
         for map_type in &seed_maps {
-
+            dbg!(&current_range);
             for map in map_type {
                 let current_map = source_range(map.source_start, map.range);
-                dbg!(&current_map);
                 if !contained_in(&current_range, &current_map).is_none() {
+                    dbg!(&current_map);
                     let mut temp_range = contained_in(&current_range, &current_map).unwrap();
                     dbg!(&temp_range);
                     temp_range.0 = seed_mapper(&map, temp_range.0).unwrap();
-                    dbg!(&temp_range);
+                    // dbg!(&temp_range);
                     current_range = temp_range;
-                    // dbg!(&current_range);
+                    
                     break;
                 }
             }
@@ -84,7 +84,7 @@ fn main() {
         if current_range.0 < lowest_dest {
             lowest_dest = current_range.0;
         }
-    }
+    // }
 
     println!("Lowest Destination: {}", lowest_dest);
 }
@@ -109,18 +109,16 @@ fn contained_in(current: &source_range, checked: &source_range) -> Option<source
     if current.0 >= checked.0 {
         returned_range.0 = current.0;
     }
-    if checked.0 > current.0  {
+    else if checked.0 > current.0  {
         returned_range.0 = checked.0;
     }
 
     if current.0 + current.1 <= checked.0 + checked.1  {
         returned_range.1 = current.0 + current.1 - returned_range.0;
     }
-    if checked.0 + checked.1 < current.0 + current.1  {
+    else if checked.0 + checked.1 < current.0 + current.1  {
         returned_range.1 = checked.0 + checked.1 - returned_range.0;
     }
 
-
-    //Returns the overlap as a new range.
     return Some(returned_range);
 }
