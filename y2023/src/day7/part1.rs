@@ -13,7 +13,7 @@ fn main() {
 
     //Read the file into a string
     let contents = fs::read_to_string("input.txt")
-        .expect("File read properly!");
+        .expect("File not read properly!");
 
     let mut hand_vec: Vec<hand_bid> = Vec::new();
     for line in contents.lines() {
