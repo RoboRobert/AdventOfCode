@@ -68,8 +68,6 @@ fn main() {
         }
     }
 
-    dbg!(&current_pos_vec);
-
     let mut steps_vec: Vec<u128> = vec![0; current_pos_vec.len()];
 
     let mut steps:u128 = 0;
@@ -108,8 +106,6 @@ fn main() {
             }
         }
     }
-
-    dbg!(&steps_vec);
 
     steps = findlcm(steps_vec);
 
