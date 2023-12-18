@@ -1,8 +1,6 @@
 use std::fs;
 
 fn main() {
-    //1759382353 is too high!
-    
     let contents = fs::read_to_string("input.txt")
                                .expect("File not read properly!");
 
