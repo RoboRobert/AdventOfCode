@@ -34,33 +34,33 @@ pub fn puzzle2(input: &str) -> i32 {
     for word in input.lines() {
         let line_vec: Vec<&str> = word.split([',', ':', ';']).collect();
 
-        let mut greatest_blue = 0;
-        let mut greatest_green = 0;
-        let mut greatest_red = 0;
+        let mut fewest_blue = 0;
+        let mut fewest_green = 0;
+        let mut fewest_red = 0;
         for line_index in 1..line_vec.len() {
             let color = line_vec[line_index].split(' ').nth(2).unwrap();
             let current_cubes = line_vec[line_index].split(' ').nth(1).unwrap().parse::<i32>().unwrap();
             match color {
                 "blue" => {
-                    if current_cubes > greatest_blue {
-                        greatest_blue = current_cubes;
+                    if current_cubes > fewest_blue {
+                        fewest_blue = current_cubes;
                     }
                 }
                 "red" => {
-                    if current_cubes > greatest_red {
-                        greatest_red = current_cubes;
+                    if current_cubes > fewest_red {
+                        fewest_red = current_cubes;
                     }
                 }
                 "green" => {
-                    if current_cubes > greatest_green {
-                        greatest_green = current_cubes;
+                    if current_cubes > fewest_green {
+                        fewest_green = current_cubes;
                     }
                 }
                 &_ => {println!("Weird!");}
             }
         }
 
-        let current_power = greatest_blue*greatest_green*greatest_red;
+        let current_power = fewest_blue*fewest_green*fewest_red;
 
         power_sum += current_power;
     }

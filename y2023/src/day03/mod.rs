@@ -1,8 +1,19 @@
-pub fn puzzle1(input: &str) -> u32 {
+#[derive(Debug)]
+struct Symbol {
+    key: char,
+    numbers: Vec<u32>,
+}
+
+fn is_symbol(input: char) -> bool {
+    if input.is_ascii_digit() || input == '.' {
+        return false;
+    }
+
+    return true;
+}
+
+fn convert_to_characters(input: &str) -> Vec<Vec<char>> {
     let mut i = 0;
-
-    let mut sum = 0;
-
     let mut characters: Vec<Vec<char>> = Vec::new();
 
     //Puts the file into a character array.
@@ -10,65 +21,41 @@ pub fn puzzle1(input: &str) -> u32 {
         characters.push(Vec::new());
 
         for character in line.chars() {
-            print!("{}",character);
             characters[i].push(character);
         }
 
         i += 1;
-        println!("");
     }
 
-    let mut row = 0;
-    let mut col = 0;
-    while row < characters.len() {
-        col = 0;
-        while col < characters[row].len() {
-            
-            //This looks at all the symbols and analyzes digits around them.
-            if is_symbol(characters[row][col]) {
-
-                //Grabs any integers above the current symbol.
-                if characters[row+1][col].is_ascii_digit() {
-                    sum += get_integer(&characters, row+1, col);
-                }
-                else {
-                    sum += get_integer(&characters, row+1, col+1);
-                    sum += get_integer(&characters, row+1, col-1);
-                }
-
-                //Grabs any integers below the current symbol.
-                if characters[row-1][col].is_ascii_digit() {
-                    sum += get_integer(&characters, row-1, col);
-                }
-                else {
-                    sum += get_integer(&characters, row-1, col+1);
-                    sum += get_integer(&characters, row-1, col-1);
-                }
-            
-                //Gets any integers to the sides of the current symbol.
-                sum += get_integer(&characters, row, col+1);
-                sum += get_integer(&characters, row, col-1);
-
-            }
-            col+=1;
-        }
-        
-        row+=1;
-    }
-
-    return sum;
+    return characters;
 }
 
+fn get_numbers(input: &Vec<Vec<char>>, row: usize, col: usize) -> Vec<u32> {
+    let mut numbers: Vec<u32> = Vec::new();
 
-fn is_symbol(input: char) -> bool {
-    if input.is_ascii_digit() {
-        return false;
+    //Grabs any integers above the current symbol.
+    if input[row+1][col].is_ascii_digit() {
+        if get_integer(input, row+1, col) > 0 {numbers.push(get_integer(input, row+1, col));}
     }
-    else if input == '.' {
-        return false;
+    else {
+        if get_integer(input, row+1, col+1) > 0 {numbers.push(get_integer(input, row+1, col+1));}
+        if get_integer(input, row+1, col-1) > 0 {numbers.push(get_integer(input, row+1, col-1));}
     }
 
-    return true;
+    //Grabs any integers below the current symbol.
+    if input[row-1][col].is_ascii_digit() {
+        if get_integer(input, row-1, col) > 0 {numbers.push(get_integer(input, row-1, col));}
+    }
+    else {
+        if get_integer(input, row-1, col+1) > 0 {numbers.push(get_integer(input, row-1, col+1));}
+        if get_integer(input, row-1, col-1) > 0 {numbers.push(get_integer(input, row-1, col-1));}
+    }
+
+    //Gets any integers to the sides of the current symbol.
+    if get_integer(input, row, col+1) > 0 {numbers.push(get_integer(input, row, col+1));}
+    if get_integer(input, row, col-1) > 0 {numbers.push(get_integer(input, row, col-1));}
+
+    return numbers;
 }
 
 fn get_integer(input: &Vec<Vec<char>>, row: usize, col: usize) -> u32 {
@@ -109,82 +96,52 @@ fn get_integer(input: &Vec<Vec<char>>, row: usize, col: usize) -> u32 {
     return return_num;
 }
 
-pub fn puzzle2(input: &str) -> u32 {
-    let mut i = 0;
-
-    let mut sum = 0;
-
-    let mut characters: Vec<Vec<char>> = Vec::new();
-
-    //Puts the file into a character array.
-    for line in input.lines() {
-        characters.push(Vec::new());
-
-        for character in line.chars() {
-            print!("{}",character);
-            characters[i].push(character);
-        }
-
-        i += 1;
-        println!("");
-    }
-
+pub fn puzzle1(input: &str) -> u32 {
     let mut row = 0;
     let mut col = 0;
+
+    let characters = convert_to_characters(input);
+
+    let mut symbol_vec: Vec<Symbol> = Vec::new();
     while row < characters.len() {
         col = 0;
         while col < characters[row].len() {
-            
             //This looks at all the symbols and analyzes digits around them.
-            if characters[row][col] == '*' {
-                let mut adjacent_values: Vec<u32> = Vec::new();
-
-                dbg!(characters[row][col]);
-                
-                //Grabs any integers above the current symbol.
-                if characters[row+1][col].is_ascii_digit() {
-                    adjacent_values.push(get_integer(&characters, row+1, col));
-                }
-                else {
-                    adjacent_values.push(get_integer(&characters, row+1, col+1));
-                    adjacent_values.push(get_integer(&characters, row+1, col-1));
-                }
-
-                //Grabs any integers below the current symbol.
-                if characters[row-1][col].is_ascii_digit() {
-                    adjacent_values.push(get_integer(&characters, row-1, col));
-                }
-                else {
-                    adjacent_values.push(get_integer(&characters, row-1, col+1));
-                    adjacent_values.push(get_integer(&characters, row-1, col-1));
-                }
-            
-                //Gets any integers to the sides of the current symbol.
-                adjacent_values.push(get_integer(&characters, row, col+1));
-                adjacent_values.push(get_integer(&characters, row, col-1));
-
-                //For any gear with exactly two adjacencies, multiply them together and
-                //add the sum.
-                let mut num_adjacent: u32 = 0;
-                let mut current: u32 = 1;
-                for integer in adjacent_values {
-                    if integer > 0 {
-                        current *= integer;
-                        num_adjacent+= 1;
-                    }
-                }
-
-                //If the vector only contained two integers, add it to the sum.
-                if num_adjacent == 2 {
-                    sum += current;
-                }
-
+            if is_symbol(characters[row][col]) {
+                symbol_vec.push(Symbol {key: characters[row][col], numbers: get_numbers(&characters, row, col)});
             }
             col+=1;
         }
-        
         row+=1;
     }
 
-    return sum;
+    // Sums all the numbers adjacent to symbols.
+    return symbol_vec.iter().map(|symbol| symbol.numbers.clone()).flatten().sum();
+}
+
+pub fn puzzle2(input: &str) -> u32 {
+    let characters = convert_to_characters(input);
+
+    let mut row = 0;
+    let mut col = 0;
+
+    let mut symbol_vec: Vec<Symbol> = Vec::new();
+    while row < characters.len() {
+        col = 0;
+        while col < characters[row].len() {
+            //This looks at all the symbols and analyzes digits around them.
+            if is_symbol(characters[row][col]) {
+                symbol_vec.push(Symbol {key: characters[row][col], numbers: get_numbers(&characters, row, col)});
+                dbg!(symbol_vec.last());
+            }
+            col+=1;
+        }
+        row+=1;
+    }
+
+    return symbol_vec.iter()
+        .filter(|symbol| symbol.key.eq(&'*') && symbol.numbers.len().eq(&2))
+        .map(|symbol| symbol.numbers.clone())
+        .map(|nums| nums[0] * nums[1])
+        .sum()
 }

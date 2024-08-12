@@ -21,7 +21,6 @@ const DIGITS: [(u32, [&str; 2]); 9] = [
 
 pub fn puzzle2(input: &str) -> u32 {
     input.lines().map(|line| {
-        dbg!(line);
         let mut first_pos: usize = 1000;
         let mut last_pos: usize = 0;
 
