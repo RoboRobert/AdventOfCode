@@ -1,4 +1,4 @@
-use std::{fs, u64::MAX};
+use std::{fs, thread::current, u64::MAX};
 
 #[derive(Debug)]
 struct SeedMap {
@@ -176,7 +176,6 @@ pub fn puzzle2(input: &str) -> u64 {
                 let mut value = seed_mapper(&seed, map);
                 if value.mapped.range > 0 {
                     next_maps.push(value.mapped);
-                    current_maps.append(&mut value.unmapped);
                     mapped = true;
                 }
             }
@@ -188,5 +187,6 @@ pub fn puzzle2(input: &str) -> u64 {
         current_maps = next_maps;
     }
 
+    dbg!(&current_maps);
     return current_maps.iter().map(|seed| seed.start).min().unwrap();
 }
