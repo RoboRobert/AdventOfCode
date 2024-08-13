@@ -1,25 +1,33 @@
 use std::{fs, u64::MAX};
 
 #[derive(Debug)]
-struct map_seed {
-    destination_start: u64,
+struct SeedMap {
     source_start: u64,
+    destination_start: u64,
+    range: u64,
+}
+
+// Tuple of starting seed value and number in range
+#[derive(Debug)]
+#[derive(Clone)]
+struct SeedTuple {
+    start: u64,
     range: u64,
 }
 
 #[derive(Debug)]
-struct source_range(u64, u64);
+#[derive(Clone)]
+struct MappedSeed {
+    mapped: SeedTuple,
+    unmapped: Vec<SeedTuple>,
+}
 
 pub fn puzzle1(input: &str) -> u64 {
     //Stores the different seeds into a vector
-    let seeds_str_vec: Vec<&str> = input.lines().nth(0).unwrap().split(":").nth(1).unwrap().split_whitespace().collect();
-    let mut seeds_vec: Vec<u64> = Vec::new();
-    for current_seed in seeds_str_vec {
-        seeds_vec.push(current_seed.parse::<u64>().unwrap());
-    }
+    let seeds_vec: Vec<SeedTuple> = input.lines().nth(0).unwrap().split(":").nth(1).unwrap().split_whitespace().map(|digit| digit.parse::<u64>().unwrap()).map(|integer| SeedTuple{start: integer, range: 1}).collect();
 
     let mut iterator: usize = 0;
-    let mut seed_maps: Vec<Vec<map_seed>> = Vec::new();
+    let mut seed_maps: Vec<Vec<SeedMap>> = Vec::new();
     for current_line in input.lines() {
         //If the current line is empty or useless, keep going.
         if current_line.is_empty() || current_line.contains("seeds:") {
@@ -33,101 +41,105 @@ pub fn puzzle1(input: &str) -> u64 {
             continue;
         }
 
-        let current_map = map_seed { 
+        let current_map = SeedMap {
             destination_start: current_line.split_whitespace().nth(0).unwrap().parse::<u64>().unwrap(), 
             source_start: current_line.split_whitespace().nth(1).unwrap().parse::<u64>().unwrap(), 
             range: current_line.split_whitespace().nth(2).unwrap().parse::<u64>().unwrap()
         };
 
-        // dbg!(seed_mapper(&current_map, seeds_vec[0]));
-
         seed_maps[iterator-1].push(current_map);
     }
-    
-    let mut lowest_dest: u64 = MAX;
-    let mut current_range: source_range;
 
-    for seed in seeds_vec {
-        current_range = source_range(seed, 0);
+    let mut current_maps: Vec<SeedTuple> = seeds_vec;
 
-        for map_type in &seed_maps {
+    for map_vec in seed_maps {
+        let mut next_maps: Vec<SeedTuple> = Vec::new();
 
-            for map in map_type {
-                let current_map = source_range(map.source_start, map.range);
-
-                if !contained_in(&current_range, &current_map).is_none() {
-                    let mut temp_range = contained_in(&current_range, &current_map).unwrap();
-
-                    temp_range.0 = seed_mapper(&map, temp_range.0).unwrap();
-
-                    current_range = temp_range;
-
-                    break;
+        while current_maps.len() > 0 {
+            let seed = current_maps.pop().unwrap();
+            let mut mapped = false;
+            for map in &map_vec {
+                let mut value = seed_mapper(&seed, map);
+                if value.mapped.range > 0 {
+                    next_maps.push(value.mapped);
+                    current_maps.append(&mut value.unmapped);
+                    mapped = true;
                 }
             }
+            if mapped == false {
+                next_maps.push(seed)
+            }
         }
-
-        if current_range.0 < lowest_dest {
-            lowest_dest = current_range.0;
-        }
+        
+        current_maps = next_maps;
     }
 
-    return lowest_dest;
+    return current_maps.iter().map(|seed| seed.start).min().unwrap();
 }
 
-fn seed_mapper(map:&map_seed, value: u64) -> Option<u64> {
-    if value > map.source_start+map.range || value < map.source_start {
-        return None;
-    }
+// Takes a seed and a seedmap and returns up to 3 new seed ranges, representing the mapped and unmapped areas
+fn seed_mapper(seed: &SeedTuple, map: &SeedMap) -> MappedSeed {
+    let mut unmapped: Vec<SeedTuple> = Vec::new();
 
-    return Some((map.destination_start) + (value-map.source_start));
-}
-
-//Takes in two maps and returns the intersection slice as another map
-fn contained_in(current: &source_range, checked: &source_range) -> Option<source_range> {
-    let mut returned_range: source_range = source_range(0,0);
-    //If the ranges do not overlap, return None
-    if current.0 > (checked.0+checked.1) || checked.0 > (current.0+current.1) {
-        return None;
+    let mut overlap: SeedTuple = SeedTuple { start: 0, range: 0 };
+    //If the ranges do not overlap, return the original seed range as overlap
+    if seed.start > (map.source_start + map.range - 1) || map.source_start > (seed.start+seed.range - 1) {
+        return MappedSeed {mapped: overlap, unmapped: vec![seed.clone()]};
     }
 
     //Otherwise, figure out where the overlap is
-    if current.0 >= checked.0 {
-        returned_range.0 = current.0;
+    if seed.start >= map.source_start {
+        overlap.start = seed.start;
     }
-    else if checked.0 > current.0  {
-        returned_range.0 = checked.0;
-    }
-
-    if current.0 + current.1 <= checked.0 + checked.1  {
-        returned_range.1 = current.0 + current.1 - returned_range.0;
-    }
-    else if checked.0 + checked.1 < current.0 + current.1  {
-        returned_range.1 = checked.0 + checked.1 - returned_range.0;
+    else if map.source_start > seed.start  {
+        overlap.start = map.source_start;
     }
 
-    return Some(returned_range);
+    if seed.start + seed.range <= map.source_start + map.range  {
+        overlap.range = seed.start + seed.range - overlap.start;
+    }
+    else if map.source_start + map.range < seed.start + seed.range  {
+        overlap.range = map.source_start + map.range - overlap.start;
+    }
+    
+    // Push the overlapped range as mapped.
+    let mapped: SeedTuple = SeedTuple{start: (map.destination_start) + (overlap.start-map.source_start), range: overlap.range};
+
+    // Push the non-overlapping regions.
+    if overlap.start > seed.start {
+        unmapped.push(SeedTuple{start: seed.start, range: overlap.start - seed.start})
+    }
+    if (overlap.start + overlap.range) < (seed.start + seed.range) {
+        let range: u64 = (seed.start + seed.range) - (overlap.start + overlap.range);
+        unmapped.push(SeedTuple{start: overlap.start + overlap.range, range: range})
+    }
+
+    return MappedSeed {mapped: mapped, unmapped: unmapped};
 }
 
-#[derive(Debug)]
-struct seed_tuple(u64, u64);
-
 pub fn puzzle2(input: &str) -> u64 {
+    // let seed: SeedTuple = SeedTuple { start: 56, range: 1 };
+    // let map: SeedMap = SeedMap { source_start: 20, destination_start: 0, range: 37 };
+    
+    // dbg!(seed_mapper(&seed, &map).mapped);
+    // dbg!(seed_mapper(&seed, &map).unmapped);
+
+    // return 0;
 
     //Stores the different seed ranges into a vector of pairs
     let seeds_str_vec: Vec<&str> = input.lines().nth(0).unwrap().split(":").nth(1).unwrap().split_whitespace().collect();
-    let mut seeds_vec: Vec<seed_tuple> = Vec::new();
+    let mut seeds_vec: Vec<SeedTuple> = Vec::new();
 
     let mut iterator = 0;
     while iterator < seeds_str_vec.len()-1 {
-        let current_seed = seed_tuple(seeds_str_vec[iterator].parse::<u64>().unwrap(), seeds_str_vec[iterator+1].parse::<u64>().unwrap());
+        let current_seed = SeedTuple {start: seeds_str_vec[iterator].parse::<u64>().unwrap(), range: seeds_str_vec[iterator+1].parse::<u64>().unwrap()};
         seeds_vec.push(current_seed);
 
         iterator+= 2;
     }
 
     let mut iterator: usize = 0;
-    let mut seed_maps: Vec<Vec<map_seed>> = Vec::new();
+    let mut seed_maps: Vec<Vec<SeedMap>> = Vec::new();
     for current_line in input.lines() {
         //If the current line is empty or useless, keep going.
         if current_line.is_empty() || current_line.contains("seeds:") {
@@ -141,45 +153,40 @@ pub fn puzzle2(input: &str) -> u64 {
             continue;
         }
 
-        let current_map = map_seed { 
+        let current_map = SeedMap {
             destination_start: current_line.split_whitespace().nth(0).unwrap().parse::<u64>().unwrap(), 
             source_start: current_line.split_whitespace().nth(1).unwrap().parse::<u64>().unwrap(), 
             range: current_line.split_whitespace().nth(2).unwrap().parse::<u64>().unwrap()
         };
 
-        // dbg!(seed_mapper(&current_map, seeds_vec[0]));
-
         seed_maps[iterator-1].push(current_map);
     }
 
-    let mut lowest_dest: u64 = MAX;
-    let mut current_range: source_range;
+    let mut current_maps: Vec<SeedTuple> = seeds_vec;
 
-    // for seed in seeds_vec {
-        current_range = source_range(seeds_vec[0].0, seeds_vec[0].1);
-        dbg!(&current_range);
+    for map_vec in seed_maps {
+        let mut next_maps: Vec<SeedTuple> = Vec::new();
 
-        for map_type in &seed_maps {
-            dbg!(&current_range);
-            for map in map_type {
-                let current_map = source_range(map.source_start, map.range);
-                if !contained_in(&current_range, &current_map).is_none() {
-                    dbg!(&current_map);
-                    let mut temp_range = contained_in(&current_range, &current_map).unwrap();
-                    dbg!(&temp_range);
-                    temp_range.0 = seed_mapper(&map, temp_range.0).unwrap();
-                    // dbg!(&temp_range);
-                    current_range = temp_range;
-                    
-                    break;
+        // dbg!(&current_maps.len());
+        while current_maps.len() > 0 {
+            let seed = current_maps.pop().unwrap();
+            // dbg!(&seed);
+            let mut mapped = false;
+            for map in &map_vec {
+                let mut value = seed_mapper(&seed, map);
+                if value.mapped.range > 0 {
+                    next_maps.push(value.mapped);
+                    current_maps.append(&mut value.unmapped);
+                    mapped = true;
                 }
             }
+            if mapped == false {
+                next_maps.push(seed)
+            }
         }
+        
+        current_maps = next_maps;
+    }
 
-        if current_range.0 < lowest_dest {
-            lowest_dest = current_range.0;
-        }
-    // }
-
-    return lowest_dest;
+    return current_maps.iter().map(|seed| seed.start).min().unwrap();
 }

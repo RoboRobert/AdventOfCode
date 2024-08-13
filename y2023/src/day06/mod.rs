@@ -1,18 +1,8 @@
 pub fn puzzle1(input: &str) -> u64 {
     //Parses the input into vectors
-    let time_vec_str: Vec<&str> = input.lines().nth(0).unwrap().split(":").nth(1).unwrap().split_whitespace().collect();
-    let mut time_vec: Vec<u64> = Vec::new();
+    let time_vec: Vec<u64> = input.lines().nth(0).unwrap().split(":").nth(1).unwrap().split_whitespace().map(|digit| digit.parse::<u64>().unwrap()).collect();
 
-    for string in time_vec_str {
-        time_vec.push(string.parse::<u64>().unwrap());
-    }
-
-    let distance_vec_str: Vec<&str> = input.lines().nth(1).unwrap().split(":").nth(1).unwrap().split_whitespace().collect();
-    let mut distance_vec: Vec<u64> = Vec::new();
-
-    for string in distance_vec_str {
-        distance_vec.push(string.parse::<u64>().unwrap());
-    }
+    let distance_vec: Vec<u64> = input.lines().nth(1).unwrap().split(":").nth(1).unwrap().split_whitespace().map(|digit| digit.parse::<u64>().unwrap()).collect();
 
     let mut current_ways: u64 = 0;
     let mut final_answer = 1;
