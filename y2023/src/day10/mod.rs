@@ -1,15 +1,13 @@
-use std::{fs, thread::current};
-
 #[derive(PartialEq)]
-enum entrance {
-    vertical,
-    side,
+enum Entrance {
+    Vertical,
+    Side,
 }
 
 #[derive(PartialEq)]
-enum direction {
-    right,
-    left
+enum Direction {
+    Right,
+    Left
 }
 
 struct Coord {
@@ -37,11 +35,11 @@ fn traverse_loop(input: &str) -> Vec<Coord> {
         char_vec.push(vec);
         temp += 1;
     }
-    //Direction around the loop. 1 is right, 0 is left
+    //Direction around the loop. 1 is Right, 0 is Left
     let mut looped: bool = false;
 
-    let mut dir = direction::right;
-    let mut entrance_dir = entrance::vertical;
+    let mut dir = Direction::Right;
+    let mut Entrance_dir = Entrance::Vertical;
     while looped == false {
         let mut current_char = char_vec[current_row][current_column];
         //In my input, the S is a horizontal pipe
@@ -51,76 +49,76 @@ fn traverse_loop(input: &str) -> Vec<Coord> {
 
         match current_char {
             '|' => {
-                if dir == direction::right {
+                if dir == Direction::Right {
                     current_row += 1;
                 }
-                else if dir == direction::left {
+                else if dir == Direction::Left {
                     current_row -= 1;
                 }
                 
-                entrance_dir = entrance::vertical;
+                Entrance_dir = Entrance::Vertical;
             } 
 
             '-' => {
-                if dir == direction::right {
+                if dir == Direction::Right {
                     current_column += 1;
                 }
-                else if dir == direction::left {
+                else if dir == Direction::Left {
                     current_column -= 1;
                 }
 
-                entrance_dir = entrance::side;
+                Entrance_dir = Entrance::Side;
             }
 
             'L' => {
-                if entrance_dir == entrance::side {
+                if Entrance_dir == Entrance::Side {
                     current_row -= 1;
-                    entrance_dir = entrance::vertical;
-                    dir = direction::left;
+                    Entrance_dir = Entrance::Vertical;
+                    dir = Direction::Left;
                 }
-                else if entrance_dir == entrance::vertical {
+                else if Entrance_dir == Entrance::Vertical {
                     current_column += 1;
-                    entrance_dir = entrance::side;
-                    dir = direction::right;
+                    Entrance_dir = Entrance::Side;
+                    dir = Direction::Right;
                 }
             } 
 
             'F' => {
-                if entrance_dir == entrance::side {
+                if Entrance_dir == Entrance::Side {
                     current_row += 1;
-                    entrance_dir = entrance::vertical;
-                    dir = direction::right;
+                    Entrance_dir = Entrance::Vertical;
+                    dir = Direction::Right;
                 }
-                else if entrance_dir == entrance::vertical {
+                else if Entrance_dir == Entrance::Vertical {
                     current_column += 1;
-                    entrance_dir = entrance::side;
-                    dir = direction::right;
+                    Entrance_dir = Entrance::Side;
+                    dir = Direction::Right;
                 }
             }
 
             'J' => {
-                if entrance_dir == entrance::side {
+                if Entrance_dir == Entrance::Side {
                     current_row -= 1;
-                    entrance_dir = entrance::vertical;
-                    dir = direction::left;
+                    Entrance_dir = Entrance::Vertical;
+                    dir = Direction::Left;
                 }
-                else if entrance_dir == entrance::vertical {
+                else if Entrance_dir == Entrance::Vertical {
                     current_column -= 1;
-                    entrance_dir = entrance::side;
-                    dir = direction::left;
+                    Entrance_dir = Entrance::Side;
+                    dir = Direction::Left;
                 }
             } 
 
             '7' => {
-                if entrance_dir == entrance::side {
+                if Entrance_dir == Entrance::Side {
                     current_row += 1;
-                    entrance_dir = entrance::vertical;
-                    dir = direction::right;
+                    Entrance_dir = Entrance::Vertical;
+                    dir = Direction::Right;
                 }
-                else if entrance_dir == entrance::vertical {
+                else if Entrance_dir == Entrance::Vertical {
                     current_column -= 1;
-                    entrance_dir = entrance::side;
-                    dir = direction::left;
+                    Entrance_dir = Entrance::Side;
+                    dir = Direction::Left;
                 }
             }
             
