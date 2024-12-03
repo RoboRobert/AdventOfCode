@@ -28,7 +28,6 @@ pub fn puzzle1(input: &str) -> i128 {
     return sum;
 }
 
-
 pub fn puzzle2(input: &str) -> i128 {
     let record_vec: Vec<Vec<i128>> = input.lines().map(|line| {line.split_whitespace().map(|current| {str::to_string(current).parse::<i128>().unwrap()}).collect()}).collect();
 
