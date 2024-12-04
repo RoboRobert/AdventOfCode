@@ -1,80 +1,80 @@
-use std::ops::{Range};
+use std::ops::{Index, Range};
 
-#[derive(Debug,PartialEq, Clone)]
-struct Move {
-    x: isize,
-    y: isize,
-    word: String,
-}
-
-pub fn get_move(char_vec: &Vec<&str>, prev_word: String, x: isize, y: isize, bounds: (usize, usize)) -> Option<Move> {
-    if(prev_word.len() >= 4 || x < 0 || y < 0 || x >= bounds.0 as isize || y >= bounds.1 as isize) {
-        return None;
-    }
-    let uY = y as usize;
-    let uX = x as usize;
-
-    let new_move: Move = Move { x: x, y: y, word: prev_word + char_vec[uY].get(uX..uX+1).unwrap()};  
-
-    return Some(new_move);
-}
-
-// Does a search from the starting spot and returns the number of XMASes formed
-pub fn search(char_vec: &Vec<&str>, start: (isize,isize), bounds: (usize, usize)) -> i128 {
-    let mut num_xmases = 0;
-    
-    let mut moves_vec: Vec<Option<Move>> = Vec::new();
-    
-    moves_vec.push(Some(Move { x: start.0, y: start.1, word:"X".to_string() }));
-
-    while moves_vec.len() > 0 {
-        let current = moves_vec.pop().unwrap();
-        match current {
-            None => continue,
-            _ => {}
+pub fn get_in_direction(char_vec: &Vec<&str>, start_pos: (usize, usize), direction: (isize, isize), bounds: (usize, usize)) -> i128 {
+    let mut built_string = String::new();
+    let mut curr_x: isize = start_pos.0 as isize;
+    let mut curr_y: isize = start_pos.1 as isize;
+    for i in 0..4 {
+        if(curr_x < 0 || curr_y < 0 || curr_x >= bounds.0 as isize || curr_y >= bounds.1 as isize) {
+            continue;
         }
+        built_string+=char_vec[curr_y as usize].get(curr_x as usize..(curr_x+1) as usize).unwrap();
 
-        let new_current = current.unwrap();
-        let current_word = new_current.word;
-        if(current_word == "XMAS") {
-            num_xmases += 1;
-        }
-        let x = new_current.x;
-        let y = new_current.y;
-        
-        moves_vec.push(get_move(char_vec, current_word.clone(), x-1, y-1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x, y-1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x+1, y-1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x-1, y, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x+1, y, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x-1, y+1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x, y+1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x+1, y+1, bounds));
+        curr_x += direction.0;
+        curr_y += direction.1;
     }
 
-    return num_xmases;
+    if(built_string == "XMAS") {return 1};
+    return 0;
 }
 
 pub fn puzzle1(input: &str) -> i128 {
     let mut sum: i128 = 0;
-    // Could just start at all the X's and DFS from there, with a maximum range of 4 moves.
     let char_vec: Vec<&str> = input.lines().collect();
     let bounds = (char_vec[0].len(), char_vec.len());
-    
+
     for i in 0..bounds.1 {
         for j in 0..bounds.0 {
-            if(char_vec[i].get(j..j+1).unwrap() == "X") {
-                sum += search(&char_vec, (i as isize,j as isize), bounds);
-            }
+            sum += get_in_direction(&char_vec, (i,j), (1,0), bounds);
+            sum += get_in_direction(&char_vec, (i,j), (-1,0), bounds);
+            sum += get_in_direction(&char_vec, (i,j), (0,1), bounds);
+            sum += get_in_direction(&char_vec, (i,j), (0,-1), bounds);
+            sum += get_in_direction(&char_vec, (i,j), (1,1), bounds);
+            sum += get_in_direction(&char_vec, (i,j), (1,-1), bounds);
+            sum += get_in_direction(&char_vec, (i,j), (-1,1), bounds);
+            sum += get_in_direction(&char_vec, (i,j), (-1,-1), bounds);
         }
     }
 
     return sum;
 }
 
+pub fn get_checked(char_vec: &Vec<&str>, pos: (isize, isize)) -> String {
+    if(pos.0 < 0 || pos.1 < 0 || pos.0 >= char_vec[0].len() as isize || pos.1 >= char_vec.len() as isize) {
+        return "".to_string();
+    }
+
+    return char_vec[pos.1 as usize].get(pos.0 as usize..(pos.0+1) as usize).unwrap().to_string();
+}
+
+pub fn get_x(char_vec: &Vec<&str>, start_pos: (isize, isize)) -> i128 {
+    let mut built_1 = String::new();
+    let mut built_2 = String::new();
+
+    built_1 += &get_checked(char_vec, (start_pos.0-1,start_pos.1-1));
+    built_1 += &get_checked(char_vec, start_pos);
+    built_1 += &get_checked(char_vec, (start_pos.0+1,start_pos.1+1));
+
+    built_2 += &get_checked(char_vec, (start_pos.0-1,start_pos.1+1));
+    built_2 += &get_checked(char_vec, start_pos);
+    built_2 += &get_checked(char_vec, (start_pos.0+1,start_pos.1-1));
+
+    if((built_1 == "MAS" || built_1 == "SAM") && (built_2 == "MAS" || built_2 == "SAM")) {return 1;}
+
+    return 0;
+}
+
 pub fn puzzle2(input: &str) -> i128 {
     let mut sum: i128 = 0;
 
+    let char_vec: Vec<&str> = input.lines().collect();
+    let bounds = (char_vec[0].len(), char_vec.len());
+
+    for i in 0..bounds.1 {
+        for j in 0..bounds.0 {
+            sum += get_x(&char_vec, (i as isize,j as isize))
+        }
+    }
 
     return sum;
 }
