@@ -34,7 +34,7 @@ mod tests {
     const INPUT: &str = include_str!("input.txt");
 
     #[test]
-    fn test_day_03_puzzle1_example() {
+    fn test_day_03_puzzle1_example1() {
         assert_eq!(puzzle1(EXAMPLE1), 161);
     }
 
@@ -44,7 +44,7 @@ mod tests {
     }
 
     #[test]
-    fn test_day_03_puzzle2_example() {
+    fn test_day_03_puzzle2_example2() {
         assert_eq!(puzzle2(EXAMPLE2), 48);
     }
 
