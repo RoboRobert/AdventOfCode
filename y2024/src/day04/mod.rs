@@ -1,5 +1,3 @@
-use std::ops::{Index, Range};
-
 pub fn get_in_direction(char_vec: &Vec<&str>, start_pos: (usize, usize), direction: (isize, isize), bounds: (usize, usize)) -> i128 {
     let mut built_string = String::new();
     let mut curr_x: isize = start_pos.0 as isize;
@@ -77,4 +75,32 @@ pub fn puzzle2(input: &str) -> i128 {
     }
 
     return sum;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const EXAMPLE: &str = include_str!("example.txt");
+    const INPUT: &str = include_str!("input.txt");
+
+    #[test]
+    fn test_day_04_puzzle1_example() {
+        assert_eq!(puzzle1(EXAMPLE), 18);
+    }
+
+    #[test]
+    fn test_day_04_puzzle1_input() {
+        assert_eq!(puzzle1(INPUT), 2543);
+    }
+
+    #[test]
+    fn test_day_04_puzzle2_example() {
+        assert_eq!(puzzle2(EXAMPLE), 9);
+    }
+
+    #[test]
+    fn test_day_04_puzzle2_input() {
+        assert_eq!(puzzle2(INPUT), 1930);
+    }
 }
