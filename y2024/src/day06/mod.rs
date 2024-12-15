@@ -1,28 +1,27 @@
 trait Get<T> { 
-    fn get_checked(&self, index: isize) -> Option<T>;
+    fn get_checked(&self, index: isize) -> Option<&T>;
 }
 
 impl<T> Get<T> for Vec<T> where T : Clone {
-    fn get_checked(&self, index: isize) -> Option<T> {
+    fn get_checked(&self, index: isize) -> Option<&T> {
         if(index < 0 || index >= self.len() as isize) {
             return None;
         }
 
-        return Some(self[index as usize].clone());
+        return self.get(index as usize);
     }
 }
-
-trait Get2D<T> { 
-    fn get_2d(&self, index: (isize, isize)) -> Option<T>;
+trait Access2D<T> {
+    fn get_2d(&self, index: (isize, isize)) -> Option<&T>;
 }
 
-impl<T> Get2D<T> for Vec<Vec<T>> where T : Clone {
-    fn get_2d(&self, index: (isize, isize)) -> Option<T> {
+impl<T> Access2D<T> for Vec<Vec<T>> where T : Clone {
+    fn get_2d(&self, index: (isize, isize)) -> Option<&T> {
         if(index.0 < 0 || index.1 < 0 || index.0 >= self[0].len() as isize || index.1 >= self.len() as isize) {
             return None;
         }
     
-        return Some(self[index.0 as usize].get(index.1 as usize).unwrap().clone());
+        return self[index.0 as usize].get(index.1 as usize);
     }
 }
 
@@ -31,41 +30,57 @@ pub fn puzzle1(input: &str) -> i128 {
 
     let mut start_pos: (isize, isize) = (0,0);
 
-    // let char_vec: Vec<Vec<char>> = input.lines().
-    // // Finds where to start
-    // for ele in input.lines().enumerate() {
-    //     let found = ele.1.find('^');
-    //     match found {
-    //         None => continue,
-    //         _ => {start_pos = (ele.0 as isize, found.unwrap() as isize); break;}
-    //     }
-    // }
+    let mut char_vec: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    // Finds where to start
+    for ele in input.lines().enumerate() {
+        let found = ele.1.find('^');
+        match found {
+            None => continue,
+            _ => {start_pos = (ele.0 as isize, found.unwrap() as isize); break;}
+        }
+    }
 
-    // let direction =  (-1,0);
-    // let mut current_pos = Some(start_pos);
-    // while current_pos != None {
-    //     let forward = str_vec.get_2d
-    //     if(str_vec.get_checked(direction.0))
-    //     match direction {
-    //         // Up
-    //         (-1,0) => {
-                
-    //         },
-    //         // Down
-    //         (1,0) => {
+    let mut direction: (isize, isize) =  (-1,0);
+    let mut pos = start_pos;
+    while true {
+        char_vec[pos.0 as usize][pos.1 as usize] = 'X';
+        let forward = char_vec.get_2d((pos.0+direction.0, pos.1+direction.1));
+        if forward == None {
+            break;
+        }
+        if(forward.unwrap() == &'#') {
+            match direction {
+                // Up
+                (-1,0) => {
+                    direction = (0,1);
+                },
+                // Down
+                (1,0) => {
+                    direction = (0,-1);
+                },
+                // Left
+                (0,-1) => {
+                    direction = (-1,0);
+                },
+                // Right
+                (0,1) => {
+                    direction = (1,0);
+                },
+                _ => print!("WEIRD"),
+            }
+        }
+        else {
+            pos = (pos.0+direction.0, pos.1+direction.1);
+        }
+    }
 
-    //         },
-    //         // Left
-    //         (0,-1) => {
-
-    //         },
-    //         // Right
-    //         (0,1) => {
-
-    //         },
-    //         _ => print!("WEIRD"),
-    //     }
-    // }
+    for ele in char_vec {
+        for ele in ele {
+            if ele == 'X' {
+                sum += 1;
+            }
+        }
+    }
 
     return sum;
 }
