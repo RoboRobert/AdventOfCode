@@ -10,14 +10,18 @@ struct Equation {
 fn do_ops(eq: Equation, ops: Vec<u32>) -> bool {
     let mut value = eq.operands[0];
     for i in 1..eq.operands.len() {
-        match(ops[i-1]) {
+        match (ops[i - 1]) {
             1 => value = value + eq.operands[i],
             2 => value = value * eq.operands[i],
-            3 => {let mut temp_str = value.to_string();
-                  let add_str = eq.operands[i].to_string();
-                  temp_str += add_str.as_str();
-                  value = temp_str.parse::<i128>().unwrap()},
-            _ => {dbg!("WEIRD");}
+            3 => {
+                let mut temp_str = value.to_string();
+                let add_str = eq.operands[i].to_string();
+                temp_str += add_str.as_str();
+                value = temp_str.parse::<i128>().unwrap()
+            }
+            _ => {
+                dbg!("WEIRD");
+            }
         }
     }
 
@@ -42,19 +46,29 @@ fn do_puzzle(input: &str, total_ops: u32) -> i128 {
         })
         .collect();
 
-    let max_ops = equation_vec.iter().max_by_key(|x| x.operands.len()).unwrap().operands.len();
+    let max_ops = equation_vec
+        .iter()
+        .max_by_key(|x| x.operands.len())
+        .unwrap()
+        .operands
+        .len();
     // Precompute all permutations
     let mut total_perms: Vec<Vec<Vec<u32>>> = Vec::new();
     for i in 1..max_ops {
-        total_perms.push((1 as u32..=i as u32).map(|_| 1 as u32..=total_ops).multi_cartesian_product().collect());
+        total_perms.push(
+            (1 as u32..=i as u32)
+                .map(|_| 1 as u32..=total_ops)
+                .multi_cartesian_product()
+                .collect(),
+        );
     }
 
     for ele in equation_vec {
-        let ops_index:usize = ele.operands.len()-2;
+        let ops_index: usize = ele.operands.len() - 2;
 
         // Goes through the precomputed permutations for the equation
         for perm in &total_perms[ops_index] {
-            if(do_ops(ele.clone(), perm.clone())) {
+            if (do_ops(ele.clone(), perm.clone())) {
                 sum += ele.result;
                 break;
             }
