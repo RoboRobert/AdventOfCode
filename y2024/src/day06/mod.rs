@@ -1,10 +1,13 @@
-trait Get<T> { 
+trait Get<T> {
     fn get_checked(&self, index: isize) -> Option<&T>;
 }
 
-impl<T> Get<T> for Vec<T> where T : Clone {
+impl<T> Get<T> for Vec<T>
+where
+    T: Clone,
+{
     fn get_checked(&self, index: isize) -> Option<&T> {
-        if(index < 0 || index >= self.len() as isize) {
+        if (index < 0 || index >= self.len() as isize) {
             return None;
         }
 
@@ -15,12 +18,19 @@ trait Access2D<T> {
     fn get_2d(&self, index: (isize, isize)) -> Option<&T>;
 }
 
-impl<T> Access2D<T> for Vec<Vec<T>> where T : Clone {
+impl<T> Access2D<T> for Vec<Vec<T>>
+where
+    T: Clone,
+{
     fn get_2d(&self, index: (isize, isize)) -> Option<&T> {
-        if(index.0 < 0 || index.1 < 0 || index.0 >= self[0].len() as isize || index.1 >= self.len() as isize) {
+        if (index.0 < 0
+            || index.1 < 0
+            || index.0 >= self[0].len() as isize
+            || index.1 >= self.len() as isize)
+        {
             return None;
         }
-    
+
         return self[index.0 as usize].get(index.1 as usize);
     }
 }
@@ -28,49 +38,52 @@ impl<T> Access2D<T> for Vec<Vec<T>> where T : Clone {
 pub fn puzzle1(input: &str) -> i128 {
     let mut sum: i128 = 0;
 
-    let mut start_pos: (isize, isize) = (0,0);
+    let mut start_pos: (isize, isize) = (0, 0);
 
     let mut char_vec: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    let mut visited_vec: Vec<Vec<i128>> = vec![vec![0; char_vec.len()]];
     // Finds where to start
     for ele in input.lines().enumerate() {
         let found = ele.1.find('^');
         match found {
             None => continue,
-            _ => {start_pos = (ele.0 as isize, found.unwrap() as isize); break;}
+            _ => {
+                start_pos = (ele.0 as isize, found.unwrap() as isize);
+                break;
+            }
         }
     }
 
-    let mut direction: (isize, isize) =  (-1,0);
+    let mut direction: (isize, isize) = (-1, 0);
     let mut pos = start_pos;
     while true {
         char_vec[pos.0 as usize][pos.1 as usize] = 'X';
-        let forward = char_vec.get_2d((pos.0+direction.0, pos.1+direction.1));
+        let forward = char_vec.get_2d((pos.0 + direction.0, pos.1 + direction.1));
         if forward == None {
             break;
         }
-        if(forward.unwrap() == &'#') {
+        if (forward.unwrap() == &'#') {
             match direction {
                 // Up
-                (-1,0) => {
-                    direction = (0,1);
-                },
+                (-1, 0) => {
+                    direction = (0, 1);
+                }
                 // Down
-                (1,0) => {
-                    direction = (0,-1);
-                },
+                (1, 0) => {
+                    direction = (0, -1);
+                }
                 // Left
-                (0,-1) => {
-                    direction = (-1,0);
-                },
+                (0, -1) => {
+                    direction = (-1, 0);
+                }
                 // Right
-                (0,1) => {
-                    direction = (1,0);
-                },
+                (0, 1) => {
+                    direction = (1, 0);
+                }
                 _ => print!("WEIRD"),
             }
-        }
-        else {
-            pos = (pos.0+direction.0, pos.1+direction.1);
+        } else {
+            pos = (pos.0 + direction.0, pos.1 + direction.1);
         }
     }
 
@@ -88,6 +101,69 @@ pub fn puzzle1(input: &str) -> i128 {
 pub fn puzzle2(input: &str) -> i128 {
     let mut sum: i128 = 0;
 
+    let mut start_pos: (isize, isize) = (0, 0);
+
+    let char_vec: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    // Finds where to start
+    for ele in input.lines().enumerate() {
+        let found = ele.1.find('^');
+        match found {
+            None => continue,
+            _ => {
+                start_pos = (ele.0 as isize, found.unwrap() as isize);
+                break;
+            }
+        }
+    }
+
+    // Try adding an obstacle to every location and count the loops
+    for i in 0..char_vec.len() {
+        for j in 0..char_vec[0].len() {
+            if(char_vec[i][j] == '#') {
+                continue;
+            }
+            let mut test_chars = char_vec.clone();
+            let mut loops = 0;
+            test_chars[i][j] = '#';
+            let mut direction: (isize, isize) = (-1, 0);
+            let mut pos = start_pos;
+            while true {
+                loops += 1;
+                if(loops > 10000) {
+                    sum += 1;
+                    break;
+                }
+                let forward = test_chars.get_2d((pos.0 + direction.0, pos.1 + direction.1));
+                if forward == None {
+                    break;
+                }
+                if (forward.unwrap() == &'#') {
+                    match direction {
+                        // Up
+                        (-1, 0) => {
+                            direction = (0, 1);
+                        }
+                        // Down
+                        (1, 0) => {
+                            direction = (0, -1);
+                        }
+                        // Left
+                        (0, -1) => {
+                            direction = (-1, 0);
+                        }
+                        // Right
+                        (0, 1) => {
+                            direction = (1, 0);
+                        }
+                        _ => print!("WEIRD"),
+                    }
+                } else {
+                    pos = (pos.0 + direction.0, pos.1 + direction.1);
+                }
+            }
+        }
+    }
+
     return sum;
 }
 
@@ -100,21 +176,21 @@ mod tests {
 
     #[test]
     fn test_day_06_puzzle1_example() {
-        assert_eq!(puzzle1(EXAMPLE), 143);
+        assert_eq!(puzzle1(EXAMPLE), 41);
     }
 
     #[test]
     fn test_day_06_puzzle1_input() {
-        assert_eq!(puzzle1(INPUT), 6034);
+        assert_eq!(puzzle1(INPUT), 5329);
     }
 
     #[test]
     fn test_day_06_puzzle2_example() {
-        assert_eq!(puzzle2(EXAMPLE), 123);
+        assert_eq!(puzzle2(EXAMPLE), 6);
     }
 
     #[test]
     fn test_day_06_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 6305);
+        assert_eq!(puzzle2(INPUT), 2162);
     }
 }
