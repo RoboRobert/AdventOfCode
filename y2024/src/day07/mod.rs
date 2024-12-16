@@ -1,4 +1,3 @@
-use std::ops::Index;
 use itertools::Itertools;
 
 #[derive(Debug, Clone)]
@@ -14,7 +13,10 @@ fn do_ops(eq: Equation, ops: Vec<u32>) -> bool {
         match(ops[i-1]) {
             1 => value = value + eq.operands[i],
             2 => value = value * eq.operands[i],
-            3 => value = value * eq.operands[i],
+            3 => {let mut temp_str = value.to_string();
+                  let add_str = eq.operands[i].to_string();
+                  temp_str += add_str.as_str();
+                  value = temp_str.parse::<i128>().unwrap()},
             _ => {dbg!("WEIRD");}
         }
     }
@@ -26,7 +28,7 @@ fn do_ops(eq: Equation, ops: Vec<u32>) -> bool {
     return false;
 }
 
-pub fn puzzle1(input: &str) -> i128 {
+fn do_puzzle(input: &str, total_ops: u32) -> i128 {
     let mut sum: i128 = 0;
 
     let mut equation_vec: Vec<Equation> = input
@@ -40,10 +42,19 @@ pub fn puzzle1(input: &str) -> i128 {
         })
         .collect();
 
+    let max_ops = equation_vec.iter().max_by_key(|x| x.operands.len()).unwrap().operands.len();
+    // Precompute all permutations
+    let mut total_perms: Vec<Vec<Vec<u32>>> = Vec::new();
+    for i in 1..max_ops {
+        total_perms.push((1 as u32..=i as u32).map(|_| 1 as u32..=total_ops).multi_cartesian_product().collect());
+    }
+
     for ele in equation_vec {
-        let num_ops:u32 = ele.operands.len() as u32 -1;
-        for perm in (1 as u32..=num_ops).map(|_| 1 as u32..=2 as u32).multi_cartesian_product() {
-            if(do_ops(ele.clone(), perm)) {
+        let ops_index:usize = ele.operands.len()-2;
+
+        // Goes through the precomputed permutations for the equation
+        for perm in &total_perms[ops_index] {
+            if(do_ops(ele.clone(), perm.clone())) {
                 sum += ele.result;
                 break;
             }
@@ -53,31 +64,12 @@ pub fn puzzle1(input: &str) -> i128 {
     return sum;
 }
 
+pub fn puzzle1(input: &str) -> i128 {
+    return do_puzzle(input, 2);
+}
+
 pub fn puzzle2(input: &str) -> i128 {
-    let mut sum: i128 = 0;
-
-    let mut equation_vec: Vec<Equation> = input
-        .lines()
-        .map(|line| {
-            let mut split = line.split([':', ' ']);
-            Equation {
-                result: split.nth(0).unwrap().parse::<i128>().unwrap(),
-                operands: split.skip(1).map(|e| e.parse::<i128>().unwrap()).collect(),
-            }
-        })
-        .collect();
-
-    for ele in equation_vec {
-        let num_ops:u32 = ele.operands.len() as u32 -1;
-        for perm in (1 as u32..=num_ops).map(|_| 1 as u32..=2 as u32).multi_cartesian_product() {
-            if(do_ops(ele.clone(), perm)) {
-                sum += ele.result;
-                break;
-            }
-        }
-    }
-
-    return sum;
+    return do_puzzle(input, 3);
 }
 
 #[cfg(test)]
@@ -89,7 +81,7 @@ mod tests {
 
     #[test]
     fn test_day_07_puzzle1_example() {
-        assert_eq!(puzzle1(EXAMPLE), 3748);
+        assert_eq!(puzzle1(EXAMPLE), 3749);
     }
 
     #[test]
@@ -104,6 +96,6 @@ mod tests {
 
     #[test]
     fn test_day_07_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 6305);
+        assert_eq!(puzzle2(INPUT), 275791737999003);
     }
 }
