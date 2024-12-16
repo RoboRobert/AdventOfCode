@@ -1,7 +1,5 @@
 use std::collections::HashSet;
 
-use num::integer::gcd;
-
 trait Access2D<T> {
     fn get_2d(&self, index: (isize, isize)) -> Option<&T>;
 }
@@ -105,8 +103,6 @@ pub fn puzzle2(input: &str) -> i128 {
                 let a2 = current_antennas[j];
                 // Find the slope between them
                 let mut slope: (isize, isize) = (a1.position.0 - a2.position.0, a1.position.1 - a2.position.1);
-                let gcd = gcd(slope.0, slope.1);
-                slope = (slope.0/gcd, slope.1/gcd);
 
                 let mut current_pos = a1.position;
                 let mut current_check = char_vec.get_2d(current_pos).cloned();
