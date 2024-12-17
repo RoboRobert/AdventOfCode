@@ -1,5 +1,6 @@
 trait Access2D<T> {
     fn get_2d(&self, index: (isize, isize)) -> Option<&T>;
+    fn check_2d(&self, index: (isize, isize)) -> Option<(isize, isize)>;
 }
 
 impl<T> Access2D<T> for Vec<Vec<T>> {
@@ -14,46 +15,88 @@ impl<T> Access2D<T> for Vec<Vec<T>> {
 
         return self[index.0 as usize].get(index.1 as usize);
     }
+
+    fn check_2d(&self, index: (isize, isize)) -> Option<(isize, isize)> {
+        if (index.0 < 0
+            || index.1 < 0
+            || index.0 >= self[0].len() as isize
+            || index.1 >= self.len() as isize)
+        {
+            return None;
+        }
+
+        return Some(index);
+    }
+}
+
+#[derive(Debug, Clone)]
+struct Move {
+    pos: Option<(isize, isize)>,
+    prev: i128,
 }
 
 // Does a search from the starting trailhead and returns the score
-pub fn search(char_vec: &Vec<&str>, start: (isize,isize), bounds: (usize, usize)) -> i128 {
-    let mut num_xmases = 0;
+pub fn search(char_vec: &Vec<Vec<char>>, start: (isize,isize)) -> i128 {
+    let mut score: i128 = 0;
     
-    let mut moves_vec: Vec<Option<Move>> = Vec::new();
+    let mut moves_vec: Vec<Move> = Vec::new();
+    let mut seen_vec: Vec<(isize,isize)> = Vec::new();
     
-    moves_vec.push(Some(Move { x: start.0, y: start.1, word:"X".to_string() }));
+    moves_vec.push(Move{pos:Some(start),prev:-1});
 
     while moves_vec.len() > 0 {
         let current = moves_vec.pop().unwrap();
-        match current {
+        match current.pos {
             None => continue,
             _ => {}
         }
-
-        let new_current = current.unwrap();
-        let current_word = new_current.word;
-        if(current_word == "XMAS") {
-            num_xmases += 1;
-        }
-        let x = new_current.x;
-        let y = new_current.y;
         
-        moves_vec.push(get_move(char_vec, current_word.clone(), x-1, y-1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x, y-1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x+1, y-1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x-1, y, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x+1, y, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x-1, y+1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x, y+1, bounds));
-        moves_vec.push(get_move(char_vec, current_word.clone(), x+1, y+1, bounds));
+        let pos = current.pos.unwrap();
+
+        if(seen_vec.contains(&pos)) {
+            dbg!("seen!");
+            continue;
+        }
+
+        seen_vec.push(pos);
+        let prev = current.prev;
+        let new_prev: i128 = char_vec.get_2d(pos).unwrap().to_digit(10).unwrap() as i128;
+
+        // If this node is not one above the previous, don't continue it.
+        if(new_prev - prev != 1) {
+            dbg!("too far!");
+            continue;
+        }
+
+        dbg!(new_prev);
+
+        // If the current node is on a 9, add one to the score
+        if(new_prev == 9) {
+            score += 1;
+            continue;
+        }
+        
+        // Push up, down, left, right
+        moves_vec.push(Move { pos: char_vec.check_2d((pos.0-1, pos.1)), prev: new_prev });
+        moves_vec.push(Move { pos: char_vec.check_2d((pos.0+1, pos.1)), prev: new_prev });
+        moves_vec.push(Move { pos: char_vec.check_2d((pos.0, pos.1-1)), prev: new_prev });
+        moves_vec.push(Move { pos: char_vec.check_2d((pos.0, pos.1+1)), prev: new_prev });
     }
 
-    return num_xmases;
+    return score;
 }
 
 pub fn puzzle1(input: &str) -> i128 {
     let mut sum: i128 = 0;
+
+    let mut char_vec: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    for (i, chars) in char_vec.iter().enumerate() {
+        for (j, &current_char) in chars.iter().enumerate() {
+            if(current_char == '0') {
+                sum += search(&char_vec, (i as isize, j as isize));
+            }
+        }
+    }
 
     return sum;
 }
