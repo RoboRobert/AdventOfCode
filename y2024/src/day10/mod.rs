@@ -36,7 +36,7 @@ struct Move {
 }
 
 // Does a search from the starting trailhead and returns the score
-pub fn search(char_vec: &Vec<Vec<char>>, start: (isize,isize)) -> i128 {
+pub fn search(char_vec: &Vec<Vec<char>>, start: (isize,isize), repeats: bool) -> i128 {
     let mut score: i128 = 0;
     
     let mut moves_vec: Vec<Move> = Vec::new();
@@ -52,26 +52,25 @@ pub fn search(char_vec: &Vec<Vec<char>>, start: (isize,isize)) -> i128 {
         }
         
         let pos = current.pos.unwrap();
-
-        if(seen_vec.contains(&pos)) {
-            dbg!("seen!");
+        
+        // The repeats bool decides if I allow the same 9 to be counted multiple times
+        // by the same trailhead.
+        // If the 9 has already been seen and no repeats, don't add it.
+        if(!repeats && seen_vec.contains(&pos)) {
             continue;
         }
-
-        seen_vec.push(pos);
+       
         let prev = current.prev;
         let new_prev: i128 = char_vec.get_2d(pos).unwrap().to_digit(10).unwrap() as i128;
 
         // If this node is not one above the previous, don't continue it.
         if(new_prev - prev != 1) {
-            dbg!("too far!");
             continue;
         }
 
-        dbg!(new_prev);
-
         // If the current node is on a 9, add one to the score
         if(new_prev == 9) {
+            seen_vec.push(pos);
             score += 1;
             continue;
         }
@@ -93,7 +92,7 @@ pub fn puzzle1(input: &str) -> i128 {
     for (i, chars) in char_vec.iter().enumerate() {
         for (j, &current_char) in chars.iter().enumerate() {
             if(current_char == '0') {
-                sum += search(&char_vec, (i as isize, j as isize));
+                sum += search(&char_vec, (i as isize, j as isize), false);
             }
         }
     }
@@ -103,6 +102,15 @@ pub fn puzzle1(input: &str) -> i128 {
 
 pub fn puzzle2(input: &str) -> i128 {
     let mut sum: i128 = 0;
+
+    let mut char_vec: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    for (i, chars) in char_vec.iter().enumerate() {
+        for (j, &current_char) in chars.iter().enumerate() {
+            if(current_char == '0') {
+                sum += search(&char_vec, (i as isize, j as isize), true);
+            }
+        }
+    }
 
     return sum;
 }
@@ -116,7 +124,7 @@ mod tests {
 
     #[test]
     fn test_day_10_puzzle1_example() {
-        assert_eq!(puzzle1(EXAMPLE), 1928);
+        assert_eq!(puzzle1(EXAMPLE), 36);
     }
 
     #[test]
@@ -126,11 +134,11 @@ mod tests {
 
     #[test]
     fn test_day_10_puzzle2_example() {
-        assert_eq!(puzzle2(EXAMPLE), 2858);
+        assert_eq!(puzzle2(EXAMPLE), 81);
     }
 
     #[test]
     fn test_day_10_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 6304576012713);
+        assert_eq!(puzzle2(INPUT), 1366);
     }
 }
