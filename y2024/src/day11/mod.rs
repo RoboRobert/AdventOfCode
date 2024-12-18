@@ -5,7 +5,7 @@ pub fn blink(input: &str, times: i128) -> i128 {
         stones.push(ele.parse::<i128>().unwrap());
     }
 
-    // Blink 25 times
+    // Blink the specified number of times
     for i in 0..times {
         // Loop through all stones and apply the rules
         let mut j: usize = 0;
@@ -17,14 +17,12 @@ pub fn blink(input: &str, times: i128) -> i128 {
             }
             // Even length
             else if(len%2 == 0) {
-                // dbg!(&current);
                 let new_1 = current[0..len/2].parse::<i128>().unwrap();
                 let new_2 = current[len/2..len].parse::<i128>().unwrap();
                 
                 stones[j] = new_1;
                 stones.insert(j+1, new_2);
                 j += 1;
-                
             }
             else {
                 stones[j]*=2024;
