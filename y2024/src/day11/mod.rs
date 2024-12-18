@@ -26,7 +26,7 @@ pub fn blink(input: &str, times: i128) -> i128 {
             if(num == 0) {
                 add_vec.push((1,worth));
             }
-            // Even length (no strings)
+            // Even length
             else if(len%2 == 0) {
                 let num1 = key/power;
                 let num2 = key%power;
