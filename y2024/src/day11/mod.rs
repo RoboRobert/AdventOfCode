@@ -48,11 +48,7 @@ pub fn blink(input: &str, times: i128) -> i128 {
         }
     }
 
-    for ele in stones {
-        sum += ele.1;
-    }
-
-    return sum;
+    return stones.values().sum();
 }
 
 pub fn puzzle1(input: &str) -> i128 {
@@ -82,11 +78,11 @@ mod tests {
 
     #[test]
     fn test_day_11_puzzle2_example() {
-        assert_eq!(puzzle2(EXAMPLE), 81);
+        assert_eq!(puzzle2(EXAMPLE), 65601038650482);
     }
 
     #[test]
     fn test_day_11_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 1366);
+        assert_eq!(puzzle2(INPUT), 242090118578155);
     }
 }
