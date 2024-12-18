@@ -1,19 +1,5 @@
 use std::collections::HashMap;
 
-pub fn count_digits(num: i128) -> u32 {
-    let mut new = num;
-    if(new == 0) {
-        return 1;
-    }
-    let mut count = 0;
-    while(new > 0) {
-        new = new/10;
-        count += 1;
-    }
-
-    return count;
-}
-
 pub fn blink(input: &str, times: i128) -> i128 {
     let mut sum:i128 = 0;
 
@@ -26,37 +12,46 @@ pub fn blink(input: &str, times: i128) -> i128 {
 
     // Blink the specified number of times
     for i in 0..times {
+        let mut remove_vec: Vec<i128> = Vec::new();
+        let mut add_vec: Vec<(i128,i128)> = Vec::new();
         // Loop through all stones and apply the rules
-        for stone in stones {
-            let num = stone.0;
-            let worth = stone.1;
-            let len:u32 = count_digits(stone.0);
-            let power:i128 = (10 as i128).pow(len/2);
+        for (key, value) in &stones {
+            let num = *key;
+            let worth = *value;
+            remove_vec.push(num);
 
-            stones.entry(num).and_modify(|val| *val = 0);
+            let len:u32 = num.to_string().len() as u32;
+            let power:i128 = (10 as i128).pow(len/2);
             // Zero case. Adds the worth of all the 0's to the 1 key, or inserts a new 1 key if doesn't exist
             if(num == 0) {
-                stones.entry(1).and_modify(|val| *val += worth).or_insert(worth);
+                add_vec.push((1,worth));
             }
             // Even length (no strings)
             else if(len%2 == 0) {
-                let num1 = num/power;
-                let num2 = num/power;
+                let num1 = key/power;
+                let num2 = key%power;
 
-                stones.entry(num1).and_modify(|val| *val += worth).or_insert(worth);
-                stones.entry(num2).and_modify(|val| *val += worth).or_insert(worth);
+                add_vec.push((num1,worth));
+                add_vec.push((num2,worth));
             }
-            // Multiplies all by 2024
+            // Multiplies by 2024
             else {
-                let new_num = num*2024;
-                stones.entry(new_num).and_modify(|val| *val += worth).or_insert(worth);
+                let new_num = key*2024;
+                add_vec.push((new_num,worth));
             }
+        }
+        for ele in remove_vec {
+            stones.remove(&ele);
+        }
+        for ele in add_vec {
+            stones.entry(ele.0).and_modify(|val| *val += ele.1).or_insert(ele.1);
         }
     }
 
-    for ele in stones.values() {
-        sum += ele;
+    for ele in stones {
+        sum += ele.1;
     }
+
     return sum;
 }
 
