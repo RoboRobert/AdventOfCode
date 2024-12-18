@@ -91,10 +91,8 @@ pub fn puzzle1(input: &str) -> i128 {
     let mut sum: i128 = 0;
 
     let mut char_vec: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
-    let len1 = char_vec.len();
-    let len2 = char_vec[0].len();
-    for i in 0..len1 {
-        for j in 0..len2 {
+    for i in 0..char_vec.len() {
+        for j in 0..char_vec[0].len() {
             sum += flood_fill(&mut char_vec, (i as isize, j as isize));
         }
     }
