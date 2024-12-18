@@ -1,38 +1,63 @@
+use std::collections::HashMap;
+
+pub fn count_digits(num: i128) -> u32 {
+    let mut new = num;
+    if(new == 0) {
+        return 1;
+    }
+    let mut count = 0;
+    while(new > 0) {
+        new = new/10;
+        count += 1;
+    }
+
+    return count;
+}
+
 pub fn blink(input: &str, times: i128) -> i128 {
-    let mut stones: Vec<i128> = Vec::new();
+    let mut sum:i128 = 0;
+
+    // Maps the current number to its worth
+    let mut stones: HashMap<i128, i128> = HashMap::new();
 
     for ele in input.split_whitespace() {
-        stones.push(ele.parse::<i128>().unwrap());
+        stones.insert(ele.parse::<i128>().unwrap(), 1);
     }
 
     // Blink the specified number of times
     for i in 0..times {
         // Loop through all stones and apply the rules
-        let mut j: usize = 0;
-        while(j < stones.len()) {
-            let current = stones[j].to_string();
-            let len = current.len();
-            if(stones[j] == 0) {
-                stones[j] = 1;
-            }
-            // Even length
-            else if(len%2 == 0) {
-                let new_1 = current[0..len/2].parse::<i128>().unwrap();
-                let new_2 = current[len/2..len].parse::<i128>().unwrap();
-                
-                stones[j] = new_1;
-                stones.insert(j+1, new_2);
-                j += 1;
-            }
-            else {
-                stones[j]*=2024;
-            }
+        for stone in stones {
+            let num = stone.0;
+            let worth = stone.1;
+            let len:u32 = count_digits(stone.0);
+            let power:i128 = (10 as i128).pow(len/2);
 
-            j += 1;
+            stones.entry(num).and_modify(|val| *val = 0);
+            // Zero case. Adds the worth of all the 0's to the 1 key, or inserts a new 1 key if doesn't exist
+            if(num == 0) {
+                stones.entry(1).and_modify(|val| *val += worth).or_insert(worth);
+            }
+            // Even length (no strings)
+            else if(len%2 == 0) {
+                let num1 = num/power;
+                let num2 = num/power;
+
+                stones.entry(num1).and_modify(|val| *val += worth).or_insert(worth);
+                stones.entry(num2).and_modify(|val| *val += worth).or_insert(worth);
+            }
+            // Multiplies all by 2024
+            else {
+                let new_num = num*2024;
+                stones.entry(new_num).and_modify(|val| *val += worth).or_insert(worth);
+            }
         }
     }
-    
-    return stones.len() as i128;
+
+    for ele in stones.values() {
+        sum += ele;
+    }
+    return sum;
 }
 
 pub fn puzzle1(input: &str) -> i128 {
