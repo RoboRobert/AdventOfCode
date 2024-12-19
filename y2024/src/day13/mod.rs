@@ -40,9 +40,7 @@ fn do_puzzle(input: &str, offset: i128) -> i128 {
         );
 
         let values = find_values(A.0, A.1, B.0, B.1, Prize.0, Prize.1).unwrap_or((0, 0));
-
-        let add = values.0 * 3 + values.1;
-         sum += add;
+        sum += values.0*3 + values.1;
     }
 
     return sum;
