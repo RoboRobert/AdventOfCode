@@ -2,9 +2,17 @@ use std::{cmp::Ordering, collections::{HashMap, HashSet}};
 #[derive(Debug, Eq, Clone)]
 struct Node {
     pos: (isize, isize),
-    prevs: HashSet<(isize, isize)>,
     dir: (isize, isize),
     weight: i128,
+}
+
+#[derive(Debug, Clone)]
+struct Path {
+    pos: (isize, isize),
+    dir: (isize, isize),
+    nodes: HashSet<(isize, isize)>,
+    weight: i128,
+    len: i128,
 }
 
 impl PartialEq for Node {
@@ -54,7 +62,7 @@ fn min_map(weight_map: &HashMap<(isize, isize), Node>) -> HashMap<(isize, isize)
             }
             
             let n_unwrap = neighbor.unwrap();
-            let mut n_update = Node{pos: n_pos, prevs: current.prevs.clone(), dir: new_dir, weight: 0};
+            let mut n_update = Node{pos: n_pos, dir: new_dir, weight: 0};
 
             if(new_dir != current.dir) {
                 n_update.weight += 1001;
@@ -66,7 +74,6 @@ fn min_map(weight_map: &HashMap<(isize, isize), Node>) -> HashMap<(isize, isize)
 
             // If the new weight is the same or lower, replace its weight in the unvisited list
             if(n_update.weight <= n_unwrap.weight) {
-                n_update.prevs.insert(current.pos);
                 map_mut.insert(n_update.pos, n_update);
             }
         }
@@ -83,14 +90,14 @@ fn create_map(char_vec: Vec<Vec<char>>) -> (HashMap<(isize, isize), Node>,(isize
     for row in char_vec.iter().enumerate() {
         for col in row.1.iter().enumerate() {
             let pos = (row.0 as isize, col.0 as isize);
-            let mut node: Node = Node{pos: (pos), prevs: HashSet::new(), dir: (0,0), weight: 0};
+            let mut node: Node = Node{pos: (pos), dir: (0,0), weight: 0};
 
             // Insert everything except the walls
             match *col.1 {
                 // Start faces East (0,1)
-                'S' => {node = Node{pos: (pos), prevs: HashSet::new(), dir: (0,1), weight: 0}; start = pos;}
-                'E' => {node = Node{pos: (pos), prevs: HashSet::new(), dir: (0,0), weight: i128::MAX}; end = pos;}
-                '.' => node = Node{pos: (pos), prevs: HashSet::new(), dir: (0,0), weight: i128::MAX},
+                'S' => {node = Node{pos: (pos), dir: (0,1), weight: 0}; start = pos;}
+                'E' => {node = Node{pos: (pos), dir: (0,0), weight: i128::MAX}; end = pos;}
+                '.' => node = Node{pos: (pos), dir: (0,0), weight: i128::MAX},
                 '#' => continue,
                 _ => {dbg!("WEIRD");}
             }
@@ -99,6 +106,65 @@ fn create_map(char_vec: Vec<Vec<char>>) -> (HashMap<(isize, isize), Node>,(isize
     }
 
     return (weight_map, start, end);
+}
+
+// Returns a HashSet that contains a list of all nodes that are on paths that lead to the end goal.
+// Assumes the start has a weight of zero
+fn search(weight_map: &HashMap<(isize, isize), Node>, min_weight: i128, end:(isize, isize)) -> HashSet<(isize,isize)> {
+    let mut path_nodes: HashSet<(isize, isize)> = HashSet::new();
+    let map: HashMap<(isize, isize), Node> = weight_map.clone();
+    let mut path_vec: Vec<Path> = Vec::new();
+
+    // Pops the start node
+    let start = map.values().min().unwrap().clone();
+    path_vec.push(Path { pos: start.pos, dir:(0,1), nodes: HashSet::new(), weight: start.weight, len: 0});
+    // Loop until all paths are found or pruned
+    while(path_vec.len() > 0) {
+        let current = path_vec.pop().unwrap();
+        if(current.weight == min_weight) {
+            path_nodes.extend(current.nodes.iter());
+            continue;
+        }
+        // If this path
+        if(current.weight > min_weight || current.pos == end || current.len > 150) {
+            continue;
+        }
+
+        let pos = current.pos;
+
+        // Direction vector with up, down, left, right
+        let dir_vec: Vec<(isize, isize)> = vec![(-1, 0),(1,0),(0,-1), (0,1)];
+        // Goes through all neighbors of the current node using the dir_vec
+        for new_dir in dir_vec {
+            let n_pos = (pos.0 + new_dir.0, pos.1 + new_dir.1);
+            let neighbor = map.get(&n_pos);
+            match neighbor {
+                // If the neighbor isn't in the graph, do nothing
+                None => continue,
+                _ => {},
+            }
+            
+            // Don't repeat nodes for each path
+            if(current.nodes.contains(&n_pos)) {
+                continue;
+            }
+
+            let mut new_path = Path { pos: n_pos, dir:new_dir, nodes: current.nodes.clone(), weight: current.weight, len: current.len+1};
+            new_path.nodes.insert(n_pos);
+            if(new_dir != current.dir) {
+                new_path.weight += 1001;
+            }
+            else {
+                new_path.weight += 1;
+            }
+            path_vec.push(new_path);
+        }
+    }
+
+    // Insert the end node as part of the path
+    path_nodes.insert(end);
+
+    return path_nodes;
 }
 
 pub fn puzzle1(input: &str) -> i128 {
@@ -119,11 +185,9 @@ pub fn puzzle2(input: &str) -> i128 {
     let end = map_tuple.2;
 
     let new_map = min_map(&weight_map);
-    let prevs = new_map.get(&end).unwrap().prevs.clone();
-    
-    dbg!(&prevs);
+    let end_weight = new_map.get(&end).unwrap().weight;
 
-    return prevs.len() as i128;
+    return search(&new_map, end_weight, end).len() as i128;
 }
 
 #[cfg(test)]
