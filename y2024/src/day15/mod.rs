@@ -3,12 +3,13 @@ use itertools::Itertools;
 
 // Either returns None or the nearest location of an air space
 fn push(obj_vec: &HashMap<(isize, isize), char>, pos:(isize, isize), dir: (isize, isize)) -> Option<(isize,isize)> {
+    let obj = *obj_vec.get(&pos).unwrap();
     // If the object is a wall, it can't be pushed
-    if(obj_vec.get(&pos).unwrap() == &'#') {
+    if(obj == '#') {
         return None;
     }
     // If the object is space, it can be pushed
-    else if(obj_vec.get(&pos).unwrap() == &'.') {
+    else if(obj == '.') {
         return Some(pos);
     }
     // If the object is something else, return based on the objects in the direction of push
@@ -45,8 +46,7 @@ pub fn puzzle1(input: &str) -> i128 {
         }
         result = push(&obj_map, pos, dir);
 
-        // If the space is pushable, swap it with the value returned by push, then swap 
-        // the robot with the position in the direction
+        // If the space is pushable, do some swaps
         if(result.is_some()) {
             let pos1 = result.unwrap();
             let pos2 = (pos.0 + dir.0, pos.1 + dir.1);
@@ -70,6 +70,22 @@ pub fn puzzle1(input: &str) -> i128 {
 
 pub fn puzzle2(input: &str) -> i128 {
     let mut sum: i128 = 0;
+
+    let mut sum: i128 = 0;
+
+    let warehouse_vec: Vec<Vec<char>> = input.split("\n\n").nth(0).unwrap().lines().map(|line| line.chars().collect()).collect();
+    let moves_vec: Vec<char> = input.split("\n\n").nth(1).unwrap().lines().join("").chars().collect();
+
+    // Convert the warehouse vec into an hashmap that maps the positions to their characters
+    let mut obj_map: HashMap<(isize,isize), char> = HashMap::new();
+
+    for ele1 in warehouse_vec.iter().enumerate() {
+        for ele2 in ele1.1.iter().enumerate() {
+            obj_map.insert((ele1.0 as isize, ele2.0 as isize), *ele2.1);
+        }
+    }
+
+    let mut pos: (isize,isize) = *obj_map.iter().find(|&map| map.1 == &'@').unwrap().0;
 
     return sum;
 }
