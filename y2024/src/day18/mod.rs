@@ -162,16 +162,16 @@ pub fn puzzle2(input: &str) -> i128 {
     while(map_min.get(&end).unwrap().weight <10000000000) {
         current_byte = pop_vec.pop().unwrap();
         start_map.remove(&current_byte);
-        // for i in 0..=end.0 {
-        //     for j in 0..=end.1 {
-        //         if(start_map.get(&(j,i)).is_some()) {
-        //             print!(".");
-        //         }
-        //         else {print!("#");}
-        //     }
-        //     println!();
-        // }
-        // println!("\n\n");
+        for i in 0..=end.0 {
+            for j in 0..=end.1 {
+                if(start_map.get(&(j,i)).is_some()) {
+                    print!(".");
+                }
+                else {print!("#");}
+            }
+            println!();
+        }
+        println!("\n\n");
         map_min = min_map(&start_map, end).clone();
         
     }
