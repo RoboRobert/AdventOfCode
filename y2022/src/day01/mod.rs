@@ -30,22 +30,22 @@ mod tests {
     const INPUT: &str = include_str!("input.txt");
 
     #[test]
-    fn test_day_03_puzzle1_example() {
+    fn test_day_01_puzzle1_example() {
         assert_eq!(puzzle1(EXAMPLE), 24000);
     }
 
     #[test]
-    fn test_day_03_puzzle1_input() {
+    fn test_day_01_puzzle1_input() {
         assert_eq!(puzzle1(INPUT), 68292);
     }
 
     #[test]
-    fn test_day_03_puzzle2_example() {
+    fn test_day_01_puzzle2_example() {
         assert_eq!(puzzle2(EXAMPLE), 45000);
     }
 
     #[test]
-    fn test_day_03_puzzle2_input() {
+    fn test_day_01_puzzle2_input() {
         assert_eq!(puzzle2(INPUT), 203203);
     }
 }
