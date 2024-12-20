@@ -1,6 +1,6 @@
 use std::{
     cmp::Ordering,
-    collections::{HashMap, HashSet},
+    collections::{HashMap},
     i128,
 };
 #[derive(Debug, Eq, Clone)]
@@ -42,10 +42,6 @@ fn min_map(weight_map: &HashMap<(isize, isize), Node>, end: (isize, isize)) -> H
         // Moves current node from visited to unvisited
         map_mut.remove(&pos);
         seen_map.insert(pos, current.clone());
-
-        // if(pos == end) {
-        //     break;
-        // }
 
         // Direction vector with up, down, left, right
         let dir_vec: Vec<(isize, isize)> = vec![(-1, 0), (1, 0), (0, -1), (0, 1)];
