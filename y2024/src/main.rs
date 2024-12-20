@@ -17,6 +17,7 @@ mod day16;
 mod day17;
 mod day18;
 mod day19;
+mod day20;
 
 use std::{env, fs};
 
@@ -64,6 +65,8 @@ fn main() {
         (18, 2) => day18::puzzle2(&input).to_string(),
         (19, 1) => day19::puzzle1(&input).to_string(),
         (19, 2) => day19::puzzle2(&input).to_string(),
+        (20, 1) => day20::puzzle1(&input).to_string(),
+        (20, 2) => day20::puzzle2(&input).to_string(),
 
         _ => panic!("no puzzle {} for day {}", puzzle, day),
     };
