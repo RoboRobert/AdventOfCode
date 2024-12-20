@@ -1,3 +1,5 @@
+use std::num::ParseIntError;
+
 #[derive(Debug,Clone)]
 struct Registers {
     A: i128,
@@ -60,8 +62,6 @@ fn do_program(registers: &mut Registers, program: &mut Vec<i128>) -> String {
         i += 2;
     }
 
-    ret_string += "\n";
-
     return ret_string;
 }
 
@@ -96,12 +96,29 @@ pub fn puzzle2(input: &str) -> i128 {
     //                      2,4,1,5,7,5,4,3,1,6,0,3,5,5,3,0
 
     let parsed = parse_input(input);
-    let mut registers = Registers{A: start_a, B: 0, C:0};
+   
     let mut program = parsed.1;
 
-    let prog_str = do_program(&mut registers, &mut program);
+    while true {
+        println!("Please enter a value for the A register: ");
+        let mut input = String::new();
+        // Read input from standard input (keyboard)
+        std::io::stdin().read_line(&mut input).unwrap();
+        // Separate outputs by this divider
+        println!("===================================================================\n");
+        let parse_int = i128::from_str_radix(input.trim(), 8);
+        let parse_unwrap;
+        match parse_int {
+            Err(e) => continue,
+            _ => parse_unwrap = parse_int.unwrap(),
+        }
+        let mut registers = Registers{A: parse_unwrap, B: 0, C:0};
 
-    print!("{prog_str}");
+        let prog_str = do_program(&mut registers, &mut program);
+
+        println!("{prog_str}");
+        println!("\n")
+    }
 
     return start_a;
 }
