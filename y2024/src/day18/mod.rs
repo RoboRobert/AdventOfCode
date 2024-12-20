@@ -29,7 +29,7 @@ impl Ord for Node {
 
 // Returns a hashmap containing the minimum path distances for every node, as well as the previous nodes for each node
 // Assumes the start node is initialized with weight 0
-fn min_map(weight_map: &HashMap<(isize, isize), Node>) -> HashMap<(isize, isize), Node> {
+fn min_map(weight_map: &HashMap<(isize, isize), Node>, end: (isize, isize)) -> HashMap<(isize, isize), Node> {
     let mut map_mut: HashMap<(isize, isize), Node> = weight_map.clone();
     let mut seen_map: HashMap<(isize, isize), Node> = HashMap::new();
 
@@ -42,6 +42,10 @@ fn min_map(weight_map: &HashMap<(isize, isize), Node>) -> HashMap<(isize, isize)
         // Moves current node from visited to unvisited
         map_mut.remove(&pos);
         seen_map.insert(pos, current.clone());
+
+        if(pos == end) {
+            break;
+        }
 
         // Direction vector with up, down, left, right
         let dir_vec: Vec<(isize, isize)> = vec![(-1, 0), (1, 0), (0, -1), (0, 1)];
@@ -119,7 +123,7 @@ pub fn puzzle1(input: &str) -> i128 {
 
     let mut start_map = create_map(small_vec, end);
     start_map.insert(start, Node{pos:start, weight:0});
-    let map_min = min_map(&start_map);
+    let map_min = min_map(&start_map, end);
 
     
 
@@ -137,8 +141,11 @@ pub fn puzzle2(input: &str) -> i128 {
         })
         .collect();
 
-    // Reverse the byte vec so I can just pop off it
-    byte_vec.reverse();
+    let start_pos = 2850;
+    let mut small_vec = byte_vec[0..start_pos].to_vec();
+
+    let mut pop_vec = byte_vec[start_pos..byte_vec.len()].to_vec();
+    pop_vec.reverse();
 
     let start: (isize, isize) = (0,0);
 
@@ -148,12 +155,12 @@ pub fn puzzle2(input: &str) -> i128 {
     // Example stuff
     // let end: (isize, isize) = (6,6);
 
-    let mut start_map = create_map(Vec::new(), end);
+    let mut start_map = create_map(small_vec, end);
     start_map.insert(start, Node{pos:start, weight:0});
     let mut current_byte = (0,0);
-    let mut map_min = min_map(&start_map);
-    while(map_min.get(&end).unwrap().weight< 10000000000) {
-        current_byte = byte_vec.pop().unwrap();
+    let mut map_min = min_map(&start_map, end);
+    while(map_min.get(&end).unwrap().weight <10000000000) {
+        current_byte = pop_vec.pop().unwrap();
         start_map.remove(&current_byte);
         // for i in 0..=end.0 {
         //     for j in 0..=end.1 {
@@ -165,7 +172,7 @@ pub fn puzzle2(input: &str) -> i128 {
         //     println!();
         // }
         // println!("\n\n");
-        map_min = min_map(&start_map).clone();
+        map_min = min_map(&start_map, end).clone();
         
     }
 
@@ -183,7 +190,7 @@ mod tests {
 
     #[test]
     fn test_day_18_puzzle1_example() {
-        assert_eq!(puzzle1(EXAMPLE), 11048);
+        assert_eq!(puzzle1(EXAMPLE), 22);
     }
 
     #[test]
@@ -198,6 +205,6 @@ mod tests {
 
     #[test]
     fn test_day_18_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 1366);
+        assert_eq!(puzzle2(INPUT), 0);
     }
 }
