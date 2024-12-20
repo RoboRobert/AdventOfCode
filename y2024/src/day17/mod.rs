@@ -92,9 +92,18 @@ pub fn puzzle1(input: &str) -> i128 {
 }
 
 pub fn puzzle2(input: &str) -> i128 {
-    let mut sum: i128 = 0;
+    let mut start_a: i128 = 0o500000100000004;
+    //                      2,4,1,5,7,5,4,3,1,6,0,3,5,5,3,0
 
-    return sum;
+    let parsed = parse_input(input);
+    let mut registers = Registers{A: start_a, B: 0, C:0};
+    let mut program = parsed.1;
+
+    let prog_str = do_program(&mut registers, &mut program);
+
+    print!("{prog_str}");
+
+    return start_a;
 }
 
 #[cfg(test)]
