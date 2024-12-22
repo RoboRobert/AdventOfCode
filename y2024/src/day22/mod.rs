@@ -22,24 +22,24 @@ impl Secrets for i128 {
     }
 }
 
-fn find_price(vec: &Vec<(i128, i128)>, sequence: &Vec<&i128>) -> i128 {
-    let mut value: i128 = 0;
-    // Use the `windows` method to create sliding windows of size 4
-    let pos = vec.windows(sequence.len())
-        .position(|window| {
-            window[0].1 == *sequence[0] && 
-            window[1].1 == *sequence[1] &&
-            window[2].1 == *sequence[2] &&
-            window[3].1 == *sequence[3]
-        });
+// fn find_price(vec: &Vec<(i128, i128)>, sequence: &Vec<&i128>) -> i128 {
+//     let mut value: i128 = 0;
+//     // Use the `windows` method to create sliding windows of size 4
+//     let pos = vec.windows(sequence.len())
+//         .position(|window| {
+//             window[0].1 == *sequence[0] && 
+//             window[1].1 == *sequence[1] &&
+//             window[2].1 == *sequence[2] &&
+//             window[3].1 == *sequence[3]
+//         });
 
-    match pos {
-        None => value = 0,
-        _ => value = vec[pos.unwrap() + sequence.len()-1].0,
-    }
+//     match pos {
+//         None => value = 0,
+//         _ => value = vec[pos.unwrap() + sequence.len()-1].0,
+//     }
 
-    return value;
-}
+//     return value;
+// }
 
 pub fn puzzle1(input: &str) -> i128 {
     let mut num_vec: Vec<i128> = input.lines().map(|line| line.parse::<i128>().unwrap()).collect();
@@ -57,11 +57,11 @@ pub fn puzzle2(input: &str) -> i128 {
     let mut sum:i128 = 0;
     let mut num_vec: Vec<i128> = input.lines().map(|line| line.parse::<i128>().unwrap()).collect();
 
-    // let mut num_vec:Vec<i128> = vec![123];
-
     // Vector of vectors to store the sequence of prices and changes for each buyer
-    // let mut price_maps: Vec<HashMap<(i128, i128, i128, i128), i128>> = vec![HashMap::new();num_vec.len()];
     let mut price_vec: Vec<Vec<(i128, i128)>> = vec![Vec::new();num_vec.len()];
+
+    // Vector of hashmaps to store the prices for each sequence
+    let mut price_maps: Vec<HashMap<(i128, i128, i128, i128), i128>> = vec![HashMap::new();num_vec.len()];
 
     let iterations: usize = 2000;
     for i in 0..iterations {
@@ -73,15 +73,25 @@ pub fn puzzle2(input: &str) -> i128 {
         }
     }
 
-    let int_range: Vec<i128> = (-9..9).collect();
+    for i in 0..price_vec.len() {
+        for window in price_vec[i].windows(4).enumerate() {
+            let sequence = (window.1[0].1, window.1[1].1,window.1[2].1,window.1[3].1);
+            price_maps[i].insert(sequence, price_vec[i][window.0+3].0);
+        }
+    }
+
+    let int_range: Vec<i128> = (-9..=9).collect();
     let total_perms: Vec<Vec<&i128>> = int_range.iter().permutations(4).collect();
-    dbg!(total_perms.len());
 
     for perm in &total_perms {
         dbg!(perm);
         let mut temp: i128 = 0;
-        for ele in &price_vec {
-            temp += find_price(ele, perm);
+        for ele in &price_maps {
+            let val = ele.get(&(*perm[0], *perm[1], *perm[2], *perm[3]));
+            match val {
+                None => temp += 0,
+                _ => temp += val.unwrap(),
+            }
         }
         sum = max(sum, temp);
     }
