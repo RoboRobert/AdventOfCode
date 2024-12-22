@@ -1,6 +1,4 @@
-use std::{cmp::max, collections::{HashMap, HashSet}, hash::Hash};
-
-use itertools::Itertools;
+use std::{cmp::max, collections::{HashMap, HashSet}};
 
 trait Secrets {
     fn mix(self, other: i128) -> i128;
