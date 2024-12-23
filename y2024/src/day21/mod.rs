@@ -1,22 +1,32 @@
 use std::collections::HashMap;
 
+fn manhattan_distance(p1: (isize, isize), p2: (isize, isize)) -> isize {
+    (p1.0-p2.0).abs() + (p1.1-p2.1).abs()
+}
+
 fn move_to(start: char, end: char, pad: &HashMap<char, (isize,isize)>) -> String {
     let p1 = pad.get(&start).unwrap();
     let p2 = pad.get(&end).unwrap();
     let y_diff = (p2.0 - p1.0);
     let x_diff = (p2.1 - p1.1);
 
+    let mut x_char = '<';
+    let mut y_char = '^';
+
     let mut char_diff: Vec<(char, isize)> = Vec::new();
 
     // Go up
-    if y_diff < 0 {char_diff.push(('^', y_diff));}
+    if y_diff < 0 {y_char = '^';}
     // Go down
-    else {char_diff.push(('v', y_diff));};
+    else {y_char = 'v';};
 
     // Go left
-    if x_diff < 0 {char_diff.push(('<', x_diff));}
+    if x_diff < 0 {x_char = '<';}
     // Go right
-    else {char_diff.push(('>', x_diff));}
+    else {x_char = '>';}
+
+    char_diff.push((y_char, y_diff.abs()));
+    char_diff.push((x_char, x_diff.abs()));
     
     let mut move_str = char_diff[0].0.to_string().repeat(char_diff[0].1.abs() as usize);
     move_str += &char_diff[1].0.to_string().repeat(char_diff[1].1.abs() as usize);
@@ -48,7 +58,7 @@ pub fn puzzle1(input: &str) -> i128 {
     pad2.insert('>', (1,2));
 
     for layer_0 in input.lines() {
-        let numeric = layer_0[0..layer_0.len()-1].parse::<usize>().unwrap();
+        // let numeric = layer_0[0..layer_0.len()-1].parse::<usize>().unwrap();
         // Layer 1
         let mut prev = 'A';
         let mut layer_1 = String::from("");
@@ -57,8 +67,8 @@ pub fn puzzle1(input: &str) -> i128 {
             prev = current;
         }
 
-        // dbg!(&layer_1);
-        // dbg!(&layer_1.len());
+        dbg!(&layer_1);
+        dbg!(&layer_1.len());
 
         // Layer 2
         prev = 'A';
@@ -68,8 +78,8 @@ pub fn puzzle1(input: &str) -> i128 {
             prev = current;
         }
 
-        // dbg!(&layer_2);
-        // dbg!(&layer_2.len());
+        dbg!(&layer_2);
+        dbg!(&layer_2.len());
 
         // Layer 3
         prev = 'A';
@@ -81,7 +91,7 @@ pub fn puzzle1(input: &str) -> i128 {
 
         dbg!(&layer_3);
         dbg!(&layer_3.len());
-        sum += (layer_3.len()*numeric) as i128;
+        // sum += (layer_3.len()*numeric) as i128;
     }
     
     sum
