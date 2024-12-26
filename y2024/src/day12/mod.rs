@@ -1,56 +1,26 @@
-trait Access2D<T> {
-    fn get_2d(&self, index: (isize, isize)) -> Option<&T>;
-    fn check_2d(&self, index: (isize, isize)) -> Option<(isize, isize)>;
-}
-
-impl<T> Access2D<T> for Vec<Vec<T>> {
-    fn get_2d(&self, index: (isize, isize)) -> Option<&T> {
-        if (index.0 < 0
-            || index.1 < 0
-            || index.0 >= self[0].len() as isize
-            || index.1 >= self.len() as isize)
-        {
-            return None;
-        }
-
-        return self[index.0 as usize].get(index.1 as usize);
-    }
-
-    fn check_2d(&self, index: (isize, isize)) -> Option<(isize, isize)> {
-        if (index.0 < 0
-            || index.1 < 0
-            || index.0 >= self[0].len() as isize
-            || index.1 >= self.len() as isize)
-        {
-            return None;
-        }
-
-        return Some(index);
-    }
-}
+use std::collections::HashMap;
 
 // Flood fills and returns price
-pub fn flood_fill(char_vec: &mut Vec<Vec<char>>, start:(isize,isize)) -> i128 {
-    if(char_vec.get_2d(start).unwrap() == &'.') {
+pub fn flood_fill(map: &mut HashMap<(isize, isize), char>, start:(isize,isize)) -> i128 {
+    if(map.get(&start).unwrap() == &'.') {
         return 0;
     }
-    let char_type = char_vec[start.0 as usize][start.1 as usize];
+    let char_type = *map.get(&start).unwrap();
     let mut area: i128 = 0;
     let mut peri: i128 = 0;
 
-    let mut moves_vec: Vec<Option<(isize,isize)>> = Vec::new();
+    let mut moves_vec: Vec<(isize,isize)> = Vec::new();
     let mut seen_vec: Vec<(isize,isize)> = Vec::new();
     
-    moves_vec.push(Some(start));
+    moves_vec.push(start);
 
     while moves_vec.len() > 0 {
-        let current = moves_vec.pop().unwrap();
+        let pos = moves_vec.pop().unwrap();
+        let current = map.get(&pos);
         match current {
             None => {peri += 1; continue;},
             _ => {}
         }
-        
-        let pos = current.unwrap();
         
         // If already seen, don't add it
         if(seen_vec.contains(&pos)) {
@@ -58,15 +28,15 @@ pub fn flood_fill(char_vec: &mut Vec<Vec<char>>, start:(isize,isize)) -> i128 {
         }
         
         // If the current char is of the correct type, add one to the area
-        if(char_vec.get_2d(pos).unwrap() == &char_type) {
-            char_vec[pos.0 as usize][pos.1 as usize] = '.';
+        if(*current.unwrap() == char_type) {
+            map.insert(pos, '.');
             area += 1;
 
             // Push up, down, left, right
-            moves_vec.push(char_vec.check_2d((pos.0-1, pos.1)));
-            moves_vec.push(char_vec.check_2d((pos.0+1, pos.1)));
-            moves_vec.push(char_vec.check_2d((pos.0, pos.1-1)));
-            moves_vec.push(char_vec.check_2d((pos.0, pos.1+1)));
+            moves_vec.push((pos.0-1, pos.1));
+            moves_vec.push((pos.0+1, pos.1));
+            moves_vec.push((pos.0, pos.1-1));
+            moves_vec.push((pos.0, pos.1+1));
 
             seen_vec.push(pos);
         }
@@ -90,19 +60,40 @@ pub fn flood_fill(char_vec: &mut Vec<Vec<char>>, start:(isize,isize)) -> i128 {
 pub fn puzzle1(input: &str) -> i128 {
     let mut sum: i128 = 0;
 
-    let mut char_vec: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
-    for i in 0..char_vec.len() {
-        for j in 0..char_vec[0].len() {
-            sum += flood_fill(&mut char_vec, (i as isize, j as isize));
+    let mut map: HashMap<(isize, isize), char> = HashMap::new();
+    let mut starts: Vec<(isize, isize)> = Vec::new();
+
+    for ele in input.lines().enumerate() {
+        for ele1 in ele.1.chars().enumerate() {
+            map.insert((ele.0 as isize, ele1.0 as isize), ele1.1);
+            starts.push((ele.0 as isize, ele1.0 as isize));
         }
     }
 
+    for ele in starts {
+        sum += flood_fill(&mut map, ele);
+    }
+            
     return sum;
 }
 
 pub fn puzzle2(input: &str) -> i128 {
     let mut sum: i128 = 0;
 
+    let mut map: HashMap<(isize, isize), char> = HashMap::new();
+    let mut starts: Vec<(isize, isize)> = Vec::new();
+
+    for ele in input.lines().enumerate() {
+        for ele1 in ele.1.chars().enumerate() {
+            map.insert((ele.0 as isize, ele1.0 as isize), ele1.1);
+            starts.push((ele.0 as isize, ele1.0 as isize));
+        }
+    }
+
+    for ele in starts {
+        sum += flood_fill(&mut map, ele);
+    }
+            
     return sum;
 }
 
@@ -111,6 +102,7 @@ mod tests {
     use super::*;
 
     const EXAMPLE: &str = include_str!("example.txt");
+    const EXAMPLE2: &str = include_str!("example2.txt");
     const INPUT: &str = include_str!("input.txt");
 
     #[test]
@@ -125,7 +117,7 @@ mod tests {
 
     #[test]
     fn test_day_12_puzzle2_example() {
-        assert_eq!(puzzle2(EXAMPLE), 81);
+        assert_eq!(puzzle2(EXAMPLE2), 80);
     }
 
     #[test]
