@@ -69,12 +69,12 @@ mod tests {
 
     #[test]
     fn test_day_25_puzzle1_example() {
-        assert_eq!(puzzle1(EXAMPLE), 7);
+        assert_eq!(puzzle1(EXAMPLE), 3);
     }
 
     #[test]
     fn test_day_25_puzzle1_input() {
-        assert_eq!(puzzle1(INPUT), 15006633487);
+        assert_eq!(puzzle1(INPUT), 2770);
     }
 
     #[test]
