@@ -25,10 +25,12 @@ pub fn puzzle1(input: &str) -> i128 {
         }
         // Otherwise make a new entry and insert
         else {
+            conn_map.entry(conn.0).or_default().insert(conn.0);
             conn_map.entry(conn.0).or_default().insert(conn.1);
-            conn_map.get_mut(conn.0).unwrap().insert(conn.0);
         }
-        
+
+        // conn_map.entry(conn.0).or_default().insert(conn.1);
+        // conn_map.get_mut(conn.0).unwrap().insert(conn.0);
     }
 
     // dbg!(&conn_map);
