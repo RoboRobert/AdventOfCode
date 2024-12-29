@@ -1,12 +1,5 @@
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Copy)]
-struct Dir<'a> {
-    name: &'a str,
-    parent: &'a str,
-    size: i128,
-}
-
 fn add_size(size: i128, dir: &str, map: &mut HashMap<&str, Dir>) {
     let mut current = dir;
     while current != "" {
@@ -16,45 +9,64 @@ fn add_size(size: i128, dir: &str, map: &mut HashMap<&str, Dir>) {
     }
 }
 
-pub fn puzzle1(input: &str) -> i128 {
-    let mut dir_map: HashMap<&str, Dir> = HashMap::new();
+fn get_directories(input:&str) -> HashMap<&str, i128> {
+    let mut dir_map: HashMap<&str, i128> = HashMap::new();
 
-    dir_map.insert("", Dir {name: "", parent: "/", size: 0 });
+    dir_map.insert("/", Dir {name: "/", parent: "", size: 0 });
     
-    let mut current = Dir {name: "", parent: "/", size: 0 };
-    for ele in input.lines() {
+    let mut current = Dir {name: "", parent: "", size: 0 };
+    for ele in input.lines().enumerate() {
+        let name = current.name;
+        println!("{name}");
+        let mut split = ele.1.split(" ");
+        let first = split.nth(0).unwrap();
+        let second = split.nth(0).unwrap();
+        let third = split.nth(0);
+        // Handle adding file sizes
+        if (first.parse::<i128>().is_ok()) {
+            add_size(first.parse::<i128>().unwrap(), current.name, &mut dir_map);
+        }
         // Handle directory change
-        if(ele.split(" ").nth(1).unwrap() == "cd") {
-            let dir = ele.split(" ").nth(2).unwrap();
+        else if(second == "cd") {
+            let dir = third.unwrap();
             let current_parent = current.parent;
-            dbg!(current);
-            dbg!(dir);
+            // dbg!(current_parent);
             match dir {
                 ".." => {
-                    current = dir_map.get(&current_parent).unwrap().clone()
+                    if(dir_map.contains_key(current_parent)) {
+                        current = dir_map.get(&current_parent).unwrap().clone();
+                    }
                 },
                 _ => {
-                    dir_map.entry(dir).or_insert(Dir { parent: current.name, name:dir, size: 0 });
-                    current = dir_map.get(&dir).unwrap().clone();
+                    current = *dir_map.entry(dir).or_insert(Dir { parent: current.name, name:dir, size: 0 });
                 },
             }
         }
-
-        // Handle adding file sizes
-        else if (ele.split(" ").nth(0).unwrap().parse::<i128>().is_ok()) {
-            add_size(ele.split(" ").nth(0).unwrap().parse::<i128>().unwrap(), current.name, &mut dir_map);
-        }
+        
     }
 
-    for ele in &dir_map {
-        dbg!(ele.1);
-    }
+    dir_map
+}
 
-    dir_map.values().filter(|val| val.size < 100000).map(|val| val.size).sum()
+pub fn puzzle1(input: &str) -> i128 {
+    let dir_map = get_directories(input);
+
+    // for ele in &dir_map {
+    //     dbg!(ele.1);
+    // }
+
+    dir_map.values().filter(|val| val.size <= 100000).map(|val| val.size).sum()
 }
 
 pub fn puzzle2(input: &str) -> i128 {
-    0
+    let dir_map = get_directories(input);
+
+    let size_needed: i128 = 30000000;
+    let current_size: i128 = dir_map.get("/").unwrap().size;
+
+    let min_diff = current_size - size_needed;
+
+    dir_map.values().filter(|val| val.size >= min_diff).map(|val| val.size).min().unwrap()
 }
 
 #[cfg(test)]
