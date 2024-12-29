@@ -1,6 +1,15 @@
 use std::collections::HashSet;
 
-fn count_visited(input: &str, start: (isize, isize), length: usize) -> i128 {
+fn to_sign(x: isize) -> isize {
+    match x.cmp(&0) {
+        std::cmp::Ordering::Greater => 1,
+        std::cmp::Ordering::Less => -1,
+        std::cmp::Ordering::Equal => 0,
+    }
+}
+
+fn count_visited(input: &str, length: usize) -> i128 {
+    let start: (isize, isize) = (0,0);
     let mut move_vec: Vec<(isize, isize)> = Vec::new();
 
     // Converts the input into a list of moves
@@ -39,28 +48,27 @@ fn count_visited(input: &str, start: (isize, isize), length: usize) -> i128 {
         for i in (0..length-1 as usize).rev() {
             let diff = (rope[i+1].0 - rope[i].0, rope[i+1].1 - rope[i].1);
 
-            if((diff.0 + diff.1).abs() >= 2) {
-                rope[i].0 += diff.0 - 1;
-                rope[i].1 += diff.1 - 1;
+            if(diff.0.abs() >= 2 || diff.1.abs() >=2) {
+                rope[i].0 += to_sign(diff.0);
+                rope[i].1 += to_sign(diff.1);
             }
-            
-            visited.insert(rope[i]);
+
+            // If it's the tail, insert the new tail position
+            if(i == 0) {
+                visited.insert(rope[i]);
+            }
         }
     }
-
-    dbg!(&visited);
 
     visited.len() as i128
 }
 
 pub fn puzzle1(input: &str) -> i128 {
-    count_visited(input, (0,0), 2)
+    count_visited(input, 2)
 }
 
 pub fn puzzle2(input: &str) -> i128 {
-    let mut score: i128 = 0;
-
-    score
+    count_visited(input, 10)
 }
 
 #[cfg(test)]
@@ -72,21 +80,21 @@ mod tests {
 
     #[test]
     fn test_day_09_puzzle1_example() {
-        assert_eq!(puzzle1(EXAMPLE), 21);
+        assert_eq!(puzzle1(EXAMPLE), 13);
     }
 
     #[test]
     fn test_day_09_puzzle1_input() {
-        assert_eq!(puzzle1(INPUT), 1719);
+        assert_eq!(puzzle1(INPUT), 6311);
     }
 
     #[test]
     fn test_day_09_puzzle2_example() {
-        assert_eq!(puzzle2(EXAMPLE), 8);
+        assert_eq!(puzzle2(EXAMPLE), 1);
     }
 
     #[test]
     fn test_day_09_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 590824);
+        assert_eq!(puzzle2(INPUT), 2482);
     }
 }
