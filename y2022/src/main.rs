@@ -5,7 +5,7 @@ mod day04;
 mod day05;
 mod day06;
 mod day07;
-// mod day08;
+mod day08;
 // mod day09;
 // mod day10;
 // mod day11;
@@ -46,8 +46,8 @@ fn main() {
         (6, 2) => day06::puzzle2(&input).to_string(),
         (7, 1) => day07::puzzle1(&input).to_string(),
         (7, 2) => day07::puzzle2(&input).to_string(),
-        // (8, 1) => day08::puzzle1(&input).to_string(),
-        // (8, 2) => day08::puzzle2(&input).to_string(),
+        (8, 1) => day08::puzzle1(&input).to_string(),
+        (8, 2) => day08::puzzle2(&input).to_string(),
         // (9, 1) => day09::puzzle1(&input).to_string(),
         // (9, 2) => day09::puzzle2(&input).to_string(),
         // (10, 1) => day10::puzzle1(&input).to_string(),
