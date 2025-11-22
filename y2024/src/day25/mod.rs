@@ -10,7 +10,7 @@ struct Lock {
 
 fn fits(key: &Key, lock: &Lock) -> bool {
     for i in 0..key.heights.len() {
-        if(key.heights[i] + lock.heights[i] > 7) {
+        if (key.heights[i] + lock.heights[i] > 7) {
             return false;
         }
     }
@@ -26,20 +26,26 @@ pub fn puzzle1(input: &str) -> i128 {
 
     // Parse the keys and locks
     // First, gather all groups of chars into Strings with all whitespace removed
-    let groups: Vec<String> = input.split("\n\n").map(|s| s.chars().filter(|c| !c.is_whitespace()).collect()).collect();
+    let groups: Vec<String> = input
+        .split("\n\n")
+        .map(|s| s.chars().filter(|c| !c.is_whitespace()).collect())
+        .collect();
     for ele in groups {
-        let mut height_vec: Vec<isize> = vec![0;5];
+        let mut height_vec: Vec<isize> = vec![0; 5];
         for character in ele.chars().enumerate() {
-            if(character.1 == '#') {
-                height_vec[character.0%5] += 1;
+            if (character.1 == '#') {
+                height_vec[character.0 % 5] += 1;
             }
         }
 
-        if(&ele[0..5] == "#####") {
-            locks.push(Lock { heights: height_vec });
-        }
-        else {
-            keys.push(Key { heights: height_vec });
+        if (&ele[0..5] == "#####") {
+            locks.push(Lock {
+                heights: height_vec,
+            });
+        } else {
+            keys.push(Key {
+                heights: height_vec,
+            });
         }
     }
 
@@ -47,7 +53,7 @@ pub fn puzzle1(input: &str) -> i128 {
 
     for key in keys {
         for lock in &locks {
-            if(fits(&key, lock)) {
+            if (fits(&key, lock)) {
                 sum += 1;
             }
         }
