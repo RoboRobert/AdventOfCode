@@ -1,13 +1,32 @@
-fn normalize_value(input: i64) -> (i64, i64) {
-    let num_clicks: i64 = (input / 100).abs();
-    if input <= 0 {
-        return ((100 + (input % 100)) % 100, num_clicks + 1);
-    }
-    if input >= 100 {
-        return (input % 100, num_clicks);
+fn simulate(start_pos: i64, amount: i64, direction: char) -> (i64, i64) {
+    let mut new_pos = start_pos;
+    let mut num_crossings = 0;
+    match direction {
+        'R' => {
+            for _ in 0..amount {
+                new_pos += 1;
+                if new_pos == 100 {
+                    new_pos = 0;
+                }
+                if new_pos == 0 {
+                    num_crossings += 1;
+                }
+            }
+        }
+        'L' => {
+            for _ in 0..amount {
+                new_pos -= 1;
+                if new_pos < 0 {
+                    new_pos = 99
+                } else if new_pos == 0 {
+                    num_crossings += 1;
+                }
+            }
+        }
+        _ => {}
     }
 
-    return (input, num_clicks);
+    return (new_pos, num_crossings);
 }
 
 pub fn puzzle1(input: &str) -> i64 {
@@ -17,13 +36,9 @@ pub fn puzzle1(input: &str) -> i64 {
     input.lines().for_each(|line| {
         let direction = line.chars().nth(0).unwrap();
         let amount = line[1..].parse::<i64>().unwrap();
-        match direction {
-            'L' => dial_pos = normalize_value(dial_pos - amount).0,
-            'R' => dial_pos = normalize_value(dial_pos + amount).0,
-            _ => {}
-        }
+        (dial_pos, _) = simulate(dial_pos, amount, direction);
 
-        if dial_pos == 0 {
+        if dial_pos == 0 || dial_pos == 100 {
             num_zeroes += 1;
         }
     });
@@ -39,16 +54,7 @@ pub fn puzzle2(input: &str) -> i64 {
     input.lines().for_each(|line| {
         let direction = line.chars().nth(0).unwrap();
         let amount = line[1..].parse::<i64>().unwrap();
-
-        match direction {
-            'L' => (dial_pos, added_zeroes) = normalize_value(dial_pos - amount),
-            'R' => (dial_pos, added_zeroes) = normalize_value(dial_pos + amount),
-            _ => {}
-        }
-
-        dbg!(line);
-        dbg!(dial_pos);
-        dbg!(added_zeroes);
+        (dial_pos, added_zeroes) = simulate(dial_pos, amount, direction);
 
         num_zeroes += added_zeroes;
     });
@@ -78,8 +84,8 @@ mod tests {
         assert_eq!(puzzle2(EXAMPLE), 6);
     }
 
-    // #[test]
-    // fn test_day_03_puzzle2_input() {
-    //     assert_eq!(puzzle2(INPUT), 0);
-    // }
+    #[test]
+    fn test_day_03_puzzle2_input() {
+        assert_eq!(puzzle2(INPUT), 6295);
+    }
 }
