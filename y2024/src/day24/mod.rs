@@ -1,13 +1,16 @@
 use std::collections::HashMap;
 
 // Returns true or false based on the success or failure of the operation
-fn do_instruction<'a>(instruction: (&str, &str, &str, &'a str), gates: &mut HashMap<&'a str, usize>) -> bool {
+fn do_instruction<'a>(
+    instruction: (&str, &str, &str, &'a str),
+    gates: &mut HashMap<&'a str, usize>,
+) -> bool {
     let op1 = gates.get(instruction.0);
     let operation = instruction.1;
     let op2 = gates.get(instruction.2);
     let res_gate = instruction.3;
 
-    if(op1 == None || op2 == None) {
+    if (op1 == None || op2 == None) {
         return false;
     }
 
@@ -15,10 +18,18 @@ fn do_instruction<'a>(instruction: (&str, &str, &str, &'a str), gates: &mut Hash
     let val2 = *op2.unwrap();
     let mut res_val: usize = 0;
     match operation {
-        "AND" => {res_val = val1&val2;},
-        "OR" => {res_val = val1|val2;},
-        "XOR" => {res_val = val1^val2;},
-        _ => {dbg!("WEIRD");},
+        "AND" => {
+            res_val = val1 & val2;
+        }
+        "OR" => {
+            res_val = val1 | val2;
+        }
+        "XOR" => {
+            res_val = val1 ^ val2;
+        }
+        _ => {
+            dbg!("WEIRD");
+        }
     }
 
     gates.insert(res_gate, res_val);
@@ -49,11 +60,11 @@ pub fn puzzle1(input: &str) -> i128 {
         instructions.push(instruction);
     }
 
-    while(instructions.len() > 0) {
+    while (instructions.len() > 0) {
         let mut remove_vec: Vec<usize> = Vec::new();
 
         for ele in instructions.iter().enumerate() {
-            if(do_instruction(*ele.1, &mut gates)) {
+            if (do_instruction(*ele.1, &mut gates)) {
                 remove_vec.push(ele.0);
             }
         }
@@ -65,7 +76,7 @@ pub fn puzzle1(input: &str) -> i128 {
 
     let mut z_vec: Vec<&str> = Vec::new();
     for ele in &gates {
-        if(ele.0.chars().nth(0).unwrap() == 'z') {
+        if (ele.0.chars().nth(0).unwrap() == 'z') {
             z_vec.push(ele.0);
         }
     }
