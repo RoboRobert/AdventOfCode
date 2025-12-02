@@ -70,22 +70,22 @@ mod tests {
     const INPUT: &str = include_str!("input.txt");
 
     #[test]
-    fn test_day_03_puzzle1_example1() {
+    fn test_day_01_puzzle1_example() {
         assert_eq!(puzzle1(EXAMPLE), 3);
     }
 
     #[test]
-    fn test_day_03_puzzle1_input() {
+    fn test_day_01_puzzle1_input() {
         assert_eq!(puzzle1(INPUT), 1052);
     }
 
     #[test]
-    fn test_day_03_puzzle2_example2() {
+    fn test_day_01_puzzle2_example() {
         assert_eq!(puzzle2(EXAMPLE), 6);
     }
 
     #[test]
-    fn test_day_03_puzzle2_input() {
+    fn test_day_01_puzzle2_input() {
         assert_eq!(puzzle2(INPUT), 6295);
     }
 }
