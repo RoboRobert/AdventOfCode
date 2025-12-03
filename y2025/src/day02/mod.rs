@@ -96,21 +96,21 @@ mod tests {
 
     #[test]
     fn test_day_02_puzzle1_example1() {
-        assert_eq!(puzzle1(EXAMPLE), 3);
+        assert_eq!(puzzle1(EXAMPLE), 1227775554);
     }
 
     #[test]
     fn test_day_02_puzzle1_input() {
-        assert_eq!(puzzle1(INPUT), 1052);
+        assert_eq!(puzzle1(INPUT), 31839939622);
     }
 
     #[test]
     fn test_day_02_puzzle2_example() {
-        assert_eq!(puzzle2(EXAMPLE), 6);
+        assert_eq!(puzzle2(EXAMPLE), 4174379265);
     }
 
     #[test]
     fn test_day_02_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 6295);
+        assert_eq!(puzzle2(INPUT), 41662374059);
     }
 }
