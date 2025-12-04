@@ -12,7 +12,7 @@ fn do_puzzle(input: &str, iterations: i64) -> i64 {
     let mut sum: i64 = 0;
 
     input.lines().for_each(|line| {
-        let mut biggest_pos_vec: Vec<(usize, i64)> = vec![];
+        let mut biggest_vec: Vec<(usize, i64)> = vec![];
 
         let battery_vec: Vec<i64> = line
             .chars()
@@ -20,11 +20,11 @@ fn do_puzzle(input: &str, iterations: i64) -> i64 {
             .collect();
 
         for _ in 0..iterations {
-            let mut temp_biggest_vec: Vec<(usize, i64)> = biggest_pos_vec.clone();
+            let mut temp_biggest_vec: Vec<(usize, i64)> = biggest_vec.clone();
 
             for (position, battery) in battery_vec.iter().enumerate() {
-                if !biggest_pos_vec.contains(&(position, *battery)) {
-                    let mut test_biggest_vec: Vec<(usize, i64)> = biggest_pos_vec.clone();
+                if !biggest_vec.contains(&(position, *battery)) {
+                    let mut test_biggest_vec: Vec<(usize, i64)> = biggest_vec.clone();
                     test_biggest_vec.push((position, *battery));
                     test_biggest_vec.sort_by(|a, b| a.0.cmp(&b.0));
                     if convert_vec(&test_biggest_vec) > convert_vec(&temp_biggest_vec) {
@@ -33,10 +33,10 @@ fn do_puzzle(input: &str, iterations: i64) -> i64 {
                 }
             }
 
-            biggest_pos_vec = temp_biggest_vec;
+            biggest_vec = temp_biggest_vec;
         }
 
-        sum += convert_vec(&biggest_pos_vec);
+        sum += convert_vec(&biggest_vec);
     });
 
     sum
