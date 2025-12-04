@@ -58,7 +58,7 @@ mod tests {
     const INPUT: &str = include_str!("input.txt");
 
     #[test]
-    fn test_day_03_puzzle1_example1() {
+    fn test_day_03_puzzle1_example() {
         assert_eq!(puzzle1(EXAMPLE), 357);
     }
 
