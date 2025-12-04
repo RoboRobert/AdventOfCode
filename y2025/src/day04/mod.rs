@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
-pub fn puzzle1(input: &str) -> i64 {
-    let mut sum = 0;
-    let directions: Vec<(isize, isize)> = vec![
+fn get_directions() -> Vec<(isize, isize)> {
+    return vec![
         (-1, -1),
         (-1, 0),
         (-1, 1),
@@ -12,6 +11,37 @@ pub fn puzzle1(input: &str) -> i64 {
         (1, 0),
         (1, 1),
     ];
+}
+
+fn is_removable(
+    element: (&(isize, isize), &char),
+    char_map: &HashMap<(isize, isize), char>,
+) -> bool {
+    let directions = get_directions();
+    if element.1 == &'.' {
+        return false;
+    }
+    let mut num_adjacent = 0;
+
+    for direction in &directions {
+        let checked_pos = (element.0 .0 + direction.0, element.0 .1 + direction.1);
+        let checked_char = char_map.get(&checked_pos);
+        if checked_char.is_some() {
+            if checked_char.unwrap() == &'@' {
+                num_adjacent += 1;
+            }
+        }
+    }
+
+    if num_adjacent < 4 {
+        return true;
+    }
+
+    return false;
+}
+
+pub fn puzzle1(input: &str) -> i64 {
+    let mut sum = 0;
 
     let mut char_map: HashMap<(isize, isize), char> = HashMap::new();
     let lines_vec: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
@@ -23,22 +53,7 @@ pub fn puzzle1(input: &str) -> i64 {
     }
 
     for element in &char_map {
-        if element.1 == &'.' {
-            continue;
-        }
-        let mut num_adjacent = 0;
-
-        for direction in &directions {
-            let checked_pos = (element.0 .0 + direction.0, element.0 .1 + direction.1);
-            let checked_char = char_map.get(&checked_pos);
-            if checked_char.is_some() {
-                if checked_char.unwrap() == &'@' {
-                    num_adjacent += 1;
-                }
-            }
-        }
-
-        if num_adjacent < 4 {
+        if is_removable(element, &char_map) {
             sum += 1;
         }
     }
@@ -48,16 +63,6 @@ pub fn puzzle1(input: &str) -> i64 {
 
 pub fn puzzle2(input: &str) -> i64 {
     let mut sum = 0;
-    let directions: Vec<(isize, isize)> = vec![
-        (-1, -1),
-        (-1, 0),
-        (-1, 1),
-        (0, -1),
-        (0, 1),
-        (1, -1),
-        (1, 0),
-        (1, 1),
-    ];
 
     let mut char_map: HashMap<(isize, isize), char> = HashMap::new();
     let lines_vec: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
@@ -71,30 +76,15 @@ pub fn puzzle2(input: &str) -> i64 {
     let mut removable_vec: Vec<(isize, isize)> = vec![];
 
     loop {
-        while (removable_vec.len() > 0) {
+        while removable_vec.len() > 0 {
             let element = removable_vec.pop().unwrap();
             char_map.insert(element, '.');
         }
 
         for element in &char_map {
-            if element.1 == &'.' {
-                continue;
-            }
-            let mut num_adjacent = 0;
-
-            for direction in &directions {
-                let checked_pos = (element.0 .0 + direction.0, element.0 .1 + direction.1);
-                let checked_char = char_map.get(&checked_pos);
-                if checked_char.is_some() {
-                    if checked_char.unwrap() == &'@' {
-                        num_adjacent += 1;
-                    }
-                }
-            }
-
-            if num_adjacent < 4 {
-                removable_vec.push(*element.0);
+            if (is_removable(element, &char_map)) {
                 sum += 1;
+                removable_vec.push(*element.0);
             }
         }
 
