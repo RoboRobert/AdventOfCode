@@ -1,31 +1,48 @@
-use std::collections::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 // Either returns None or the nearest location of an air space
-fn push(obj_vec: &HashMap<(isize, isize), char>, pos:(isize, isize), dir: (isize, isize)) -> Option<(isize,isize)> {
+fn push(
+    obj_vec: &HashMap<(isize, isize), char>,
+    pos: (isize, isize),
+    dir: (isize, isize),
+) -> Option<(isize, isize)> {
     let obj = *obj_vec.get(&pos).unwrap();
     // If the object is a wall, it can't be pushed
-    if(obj == '#') {
+    if (obj == '#') {
         return None;
     }
     // If the object is space, it can be pushed
-    else if(obj == '.') {
+    else if (obj == '.') {
         return Some(pos);
     }
     // If the object is something else, return based on the objects in the direction of push
     else {
-        return push(obj_vec, (pos.0+dir.0, pos.1+dir.1), dir);
+        return push(obj_vec, (pos.0 + dir.0, pos.1 + dir.1), dir);
     }
 }
 
 pub fn puzzle1(input: &str) -> i128 {
     let mut sum: i128 = 0;
 
-    let warehouse_vec: Vec<Vec<char>> = input.split("\n\n").nth(0).unwrap().lines().map(|line| line.chars().collect()).collect();
-    let moves_vec: Vec<char> = input.split("\n\n").nth(1).unwrap().lines().join("").chars().collect();
+    let warehouse_vec: Vec<Vec<char>> = input
+        .split("\n\n")
+        .nth(0)
+        .unwrap()
+        .lines()
+        .map(|line| line.chars().collect())
+        .collect();
+    let moves_vec: Vec<char> = input
+        .split("\n\n")
+        .nth(1)
+        .unwrap()
+        .lines()
+        .join("")
+        .chars()
+        .collect();
 
     // Convert the warehouse vec into an hashmap that maps the positions to their characters
-    let mut obj_map: HashMap<(isize,isize), char> = HashMap::new();
+    let mut obj_map: HashMap<(isize, isize), char> = HashMap::new();
 
     for ele1 in warehouse_vec.iter().enumerate() {
         for ele2 in ele1.1.iter().enumerate() {
@@ -33,21 +50,21 @@ pub fn puzzle1(input: &str) -> i128 {
         }
     }
 
-    let mut pos: (isize,isize) = *obj_map.iter().find(|&map| map.1 == &'@').unwrap().0;
+    let mut pos: (isize, isize) = *obj_map.iter().find(|&map| map.1 == &'@').unwrap().0;
     for ele in moves_vec {
-        let mut dir: (isize, isize) = (0,0);
+        let mut dir: (isize, isize) = (0, 0);
         let mut result = None;
         match ele {
-            '^' => dir = (-1,0),
-            'v' => dir = (1,0),
-            '<' => dir = (0,-1),
-            '>' => dir = (0,1),
-            _ => {},
+            '^' => dir = (-1, 0),
+            'v' => dir = (1, 0),
+            '<' => dir = (0, -1),
+            '>' => dir = (0, 1),
+            _ => {}
         }
         result = push(&obj_map, pos, dir);
 
         // If the space is pushable, do some swaps
-        if(result.is_some()) {
+        if (result.is_some()) {
             let pos1 = result.unwrap();
             let pos2 = (pos.0 + dir.0, pos.1 + dir.1);
 
@@ -60,8 +77,8 @@ pub fn puzzle1(input: &str) -> i128 {
     }
 
     for ele in obj_map {
-        if(ele.1 == 'O') {
-            sum += ((100*ele.0.0) + ele.0.1) as i128;
+        if (ele.1 == 'O') {
+            sum += ((100 * ele.0 .0) + ele.0 .1) as i128;
         }
     }
 
@@ -73,11 +90,24 @@ pub fn puzzle2(input: &str) -> i128 {
 
     let mut sum: i128 = 0;
 
-    let warehouse_vec: Vec<Vec<char>> = input.split("\n\n").nth(0).unwrap().lines().map(|line| line.chars().collect()).collect();
-    let moves_vec: Vec<char> = input.split("\n\n").nth(1).unwrap().lines().join("").chars().collect();
+    let warehouse_vec: Vec<Vec<char>> = input
+        .split("\n\n")
+        .nth(0)
+        .unwrap()
+        .lines()
+        .map(|line| line.chars().collect())
+        .collect();
+    let moves_vec: Vec<char> = input
+        .split("\n\n")
+        .nth(1)
+        .unwrap()
+        .lines()
+        .join("")
+        .chars()
+        .collect();
 
     // Convert the warehouse vec into an hashmap that maps the positions to their characters
-    let mut obj_map: HashMap<(isize,isize), char> = HashMap::new();
+    let mut obj_map: HashMap<(isize, isize), char> = HashMap::new();
 
     for ele1 in warehouse_vec.iter().enumerate() {
         for ele2 in ele1.1.iter().enumerate() {
@@ -85,7 +115,7 @@ pub fn puzzle2(input: &str) -> i128 {
         }
     }
 
-    let mut pos: (isize,isize) = *obj_map.iter().find(|&map| map.1 == &'@').unwrap().0;
+    let mut pos: (isize, isize) = *obj_map.iter().find(|&map| map.1 == &'@').unwrap().0;
 
     return sum;
 }
