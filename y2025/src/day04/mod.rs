@@ -82,7 +82,7 @@ pub fn puzzle2(input: &str) -> i64 {
         }
 
         for element in &char_map {
-            if (is_removable(element, &char_map)) {
+            if is_removable(element, &char_map) {
                 sum += 1;
                 removable_vec.push(*element.0);
             }
