@@ -72,6 +72,8 @@ pub fn puzzle2(input: &str) -> i64 {
                 if i == j {
                     continue;
                 }
+
+                // Solves the gigachad range issue
                 let mut add_update = true;
                 index_updates.iter().for_each(|update| {
                     if update.0 == i || update.0 == j || update.1 == i || update.1 == j {
