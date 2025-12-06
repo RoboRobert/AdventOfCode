@@ -131,16 +131,16 @@ mod tests {
 
     #[test]
     fn test_day_05_puzzle1_input() {
-        assert_eq!(puzzle1(INPUT), 1547);
+        assert_eq!(puzzle1(INPUT), 577);
     }
 
     #[test]
     fn test_day_05_puzzle2_example() {
-        assert_eq!(puzzle2(EXAMPLE), 43);
+        assert_eq!(puzzle2(EXAMPLE), 14);
     }
 
     #[test]
     fn test_day_05_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 8948);
+        assert_eq!(puzzle2(INPUT), 350513176552950);
     }
 }
