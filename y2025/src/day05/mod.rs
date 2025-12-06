@@ -66,13 +66,22 @@ pub fn puzzle2(input: &str) -> i64 {
     // Iteratively combine ranges until there aren't any left to combine
     loop {
         let mut index_updates: Vec<(usize, usize)> = vec![];
-        for (i, range1) in range_vec.iter().enumerate() {
-            for (j, range2) in range_vec.iter().enumerate() {
+        for i in 0..range_vec.len() {
+            for j in 0..range_vec.len() {
                 // Skip checking overlap for the same element
                 if i == j {
                     continue;
                 }
-                if has_overlap(*range1, *range2) && !index_updates.contains(&(j, i)) {
+                let mut add_update = true;
+                index_updates.iter().for_each(|update| {
+                    if update.0 == i || update.0 == j || update.1 == i || update.1 == j {
+                        add_update = false;
+                    }
+                });
+
+                let range1 = range_vec[i];
+                let range2 = range_vec[j];
+                if add_update && has_overlap(range1, range2) {
                     index_updates.push((i, j));
                 }
             }
@@ -97,8 +106,6 @@ pub fn puzzle2(input: &str) -> i64 {
             .into_iter()
             .filter(|item| item.0 != -1 && item.1 != -1)
             .collect();
-
-        dbg!(range_vec.len());
     }
 
     for ele in range_vec {
@@ -122,12 +129,12 @@ mod tests {
 
     #[test]
     fn test_day_05_puzzle1_input() {
-        assert_eq!(puzzle1(INPUT), 577);
+        assert_eq!(puzzle1(INPUT), 1547);
     }
 
     #[test]
     fn test_day_05_puzzle2_example() {
-        assert_eq!(puzzle2(EXAMPLE), 14);
+        assert_eq!(puzzle2(EXAMPLE), 43);
     }
 
     #[test]
