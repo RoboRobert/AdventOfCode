@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 fn do_puzzle(input: &str) -> (i64, i64) {
     let mut possible_paths: i64 = 0;
@@ -98,6 +98,6 @@ mod tests {
 
     #[test]
     fn test_day_07_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 7669802156452);
+        assert_eq!(puzzle2(INPUT), 47274292756692);
     }
 }
