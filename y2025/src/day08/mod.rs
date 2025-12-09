@@ -34,8 +34,9 @@ impl Edge {
     }
 }
 
-pub fn puzzle1(input: &str) -> i64 {
-    let mut sum = 1;
+fn do_puzzle(input: &str, puzzle_num: i64) -> (i64, i64) {
+    let mut largest_circuits = 1;
+    let mut final_coords: i64 = 0;
 
     let nodes: Vec<Coordinate> = input
         .lines()
@@ -64,9 +65,16 @@ pub fn puzzle1(input: &str) -> i64 {
         }
     }
 
+    let mut deduped: HashSet<Coordinate> = HashSet::new();
+
     edges.sort_by(|a, b| b.distance.cmp(&a.distance));
 
-    for i in 0.. {
+    let mut iterations = 1000;
+    if puzzle_num == 2 {
+        iterations = edges.len();
+    }
+
+    for _ in 0..iterations {
         let mut additions: Vec<usize> = vec![];
         let added_edge = edges.pop().unwrap();
         for j in 0..circuits.len() {
@@ -103,35 +111,45 @@ pub fn puzzle1(input: &str) -> i64 {
         if additions.len() == 0 {
             circuits.push(HashSet::from([added_edge]));
         }
-    }
 
-    circuits.sort_by(|set1, set2| set1.len().cmp(&set2.len()));
+        if puzzle_num == 2 {
+            deduped.insert(added_edge.coord1);
+            deduped.insert(added_edge.coord2);
 
-    let mut deduped: Vec<HashSet<Coordinate>> = vec![];
-
-    for i in 0..circuits.len() {
-        deduped.push(HashSet::new());
-        for edge in &circuits[i] {
-            deduped[i].insert(edge.coord1);
-            deduped[i].insert(edge.coord2);
+            if deduped.len() == nodes.len() {
+                final_coords = added_edge.coord1.x * added_edge.coord2.x;
+                break;
+            }
         }
     }
 
-    deduped.sort_by(|set1, set2| set1.len().cmp(&set2.len()));
+    if puzzle_num == 1 {
+        let mut deduped_sets: Vec<HashSet<Coordinate>> = vec![];
+        for i in 0..circuits.len() {
+            deduped_sets.push(HashSet::new());
+            for edge in &circuits[i] {
+                deduped_sets[i].insert(edge.coord1);
+                deduped_sets[i].insert(edge.coord2);
+            }
+        }
 
-    for _ in 0..3 {
-        let ele = deduped.pop().unwrap();
-        dbg!(&ele);
-        sum *= (ele.len()) as i64;
+        deduped_sets.sort_by(|set1, set2| set1.len().cmp(&set2.len()));
+
+        for _ in 0..3 {
+            let ele = deduped_sets.pop().unwrap();
+            largest_circuits *= (ele.len()) as i64;
+        }
     }
 
-    sum
+    (largest_circuits, final_coords)
+}
+
+pub fn puzzle1(input: &str) -> i64 {
+    do_puzzle(input, 1).0
 }
 
 pub fn puzzle2(input: &str) -> i64 {
-    let mut sum = 0;
-
-    sum
+    do_puzzle(input, 2).1
 }
 
 #[cfg(test)]
@@ -143,21 +161,21 @@ mod tests {
 
     #[test]
     fn test_day_08_puzzle1_example() {
-        assert_eq!(puzzle1(EXAMPLE), 40);
+        assert_eq!(puzzle1(EXAMPLE), 0);
     }
 
     #[test]
     fn test_day_08_puzzle1_input() {
-        assert_eq!(puzzle1(INPUT), 1642);
+        assert_eq!(puzzle1(INPUT), 75680);
     }
 
     #[test]
     fn test_day_08_puzzle2_example() {
-        assert_eq!(puzzle2(EXAMPLE), 40);
+        assert_eq!(puzzle2(EXAMPLE), 0);
     }
 
     #[test]
     fn test_day_08_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 47274292756692);
+        assert_eq!(puzzle2(INPUT), 8995844880);
     }
 }
