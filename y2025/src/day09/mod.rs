@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Point {
@@ -38,7 +38,7 @@ impl Edge {
 
 #[derive(Debug, Clone)]
 struct Polygon {
-    points: Vec<Point>,
+    _points: Vec<Point>,
     edges: Vec<Edge>,
 }
 
@@ -59,7 +59,7 @@ impl Polygon {
         }
 
         return Polygon {
-            points: points.to_owned(),
+            _points: points.to_owned(),
             edges: edge_vec,
         };
     }
@@ -169,7 +169,6 @@ pub fn puzzle2(input: &str) -> i64 {
             x: rectangle.p2.x,
             y: rectangle.p1.y,
         };
-        let points: Vec<Point> = vec![point1, point2, point3, point4];
 
         let mut contained: bool = true;
 
@@ -223,8 +222,6 @@ pub fn puzzle2(input: &str) -> i64 {
         }
     }
 
-    // 4591195600 is too high
-
     max_area
 }
 
@@ -252,6 +249,6 @@ mod tests {
 
     #[test]
     fn test_day_09_puzzle2_input() {
-        assert_eq!(puzzle2(INPUT), 8995844880);
+        assert_eq!(puzzle2(INPUT), 1539238860);
     }
 }
